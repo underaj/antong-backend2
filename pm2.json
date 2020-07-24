@@ -1,0 +1,15 @@
+{
+  "apps": [{
+    "name": "practice-car",
+    "script": "production.js",
+    "cwd": "D:\Progame Files\vscode\vscode-workspace\practice-car",
+    "exec_mode": "fork",
+    "max_memory_restart": "1G",
+    "autorestart": true,
+    "node_args": [],
+    "args": [],
+    "env": {
+      
+    }
+  }]
+}
