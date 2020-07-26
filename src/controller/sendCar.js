@@ -30,7 +30,6 @@ module.exports = class extends Base {
              .where({"car_id":element.car_id,"order_time":date,"sbject":type,"ordertype":2,"statusd":1}).field("name,time_code,name AS coachName")
              .union("SELECT name,time_code,v_sho.coachName AS coachName  from v_sho where car_id ="+element.car_id +" and order_time='"+date+"' and sbject='"+type +"' and ordertype=1 and statusd =1  and typed= 1")
             .union("SELECT name,time_code,v_sho.coachName AS coachName  from v_sho where car_id ="+element.car_id +" and order_time='"+date+"' and sbject='"+type +"' and ordertype=3 and statusd =1  and order_check= 1")
-
             .select();
             var mag={
                 code:element.car_no,
@@ -38,7 +37,12 @@ module.exports = class extends Base {
             }
              info.push(mag);
          }
-         return this.success(info);
+         // 获取时间段的预约数量
+         let count = await this.model("v_sho").where({"order_time" : date,"sbject" : type ,"statusd":1,"ordertype":["in","1,2"]})
+         .union("SELECT COUNT(1)as num,time_code  from v_sho where   order_time='"+date+"' and sbject='"+type +"' and statusd =1  and  ordertype =3  AND order_check =1")
+         .field("COUNT(1)as num,time_code") .group("time_code")
+         .select();
+         return this.success({info,count});
     }
 
 

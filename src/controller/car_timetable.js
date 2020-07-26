@@ -492,8 +492,6 @@ module.exports = class extends Base {
 
 
 
-
-
     getTimeCode(data) {
         let code = [];
         for (let index = 0; index < data.length; index++) {

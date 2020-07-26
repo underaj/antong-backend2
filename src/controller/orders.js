@@ -22,7 +22,7 @@ module.exports = class extends Base {
      */
     async queryOrderAction() {
         //获取查询条件
-        let studensPhone = this.post("studentsPhone");//学员电话
+        let studentsName = this.post("studentsName");//学员电话
         let coachId = this.post("coachId");//教练card
         let ordersNum = this.post("ordersNum");//订单编号
         let coachPhone = this.post("coachPhone");//教练电话
@@ -32,33 +32,49 @@ module.exports = class extends Base {
         let is_return = this.post("isReturn");//是否返点
         let type = this.post("type");//账号查看订单的类型
         let status = this.post("status");//账号查看订单的类型
+        let coachName = this.post("coachName"); // 教练姓名
+        //  时间code
+        let timecode = this.post("timecode");
+        let orderTime = this.post("orderTime");
 
         const query = this.model("v_main");
         const query01 = this.model("v_main");
-        if (!think.isEmpty(studensPhone)) {
-            query.where({ "v_main.tel": ["like", "%" + studensPhone + "%"] });
-            query01.where({ "v_main.tel": ["like", "%" + studensPhone + "%"] });
+        // 学员电话
+        if (!think.isEmpty(studentsName)) {
+            query.where({ "v_main.student_name": ["like", "%" + studentsName + "%"] });
+            query01.where({ "v_main.student_name": ["like", "%" + studentsName + "%"] });
         }
+        //  教练id
         if (!think.isEmpty(coachId)) {
             query.where({ "v_main.coach_card": coachId });
             query01.where({ "v_main.coach_card": coachId });
         }
+        //  教练姓名
+        if (!think.isEmpty(coachName)) {
+            query.where({ "v_main.coach_name": coachName });
+            query01.where({ "v_main.coach_name": coachName });
+        }
+        // 订单编号
         if (!think.isEmpty(ordersNum)) {
             query.where({ "v_main.order_code": ordersNum });
             query01.where({ "v_main.order_code": ordersNum });
         }
+        //  教练电话
         if (!think.isEmpty(coachPhone)) {
             query.where({ "v_main.phone": coachPhone });
             query01.where({ "v_main.phone": coachPhone });
         }
+        // 订单类型
         if (!think.isEmpty(ordersType)) {
             query.where({ "v_main.collection_type": ordersType });
             query01.where({ "v_main.collection_type": ordersType });
         }
+        //  是否取消
         if (!think.isEmpty(is_return)) {
             query.where({ "v_main.is_return": is_return });
             query01.where({ "v_main.is_return": is_return });
         }
+        //  科目类型
         if (!think.isEmpty(type)) {
             query.where({ "v_main.suject": type });
             query01.where({ "v_main.suject": type });
@@ -67,6 +83,16 @@ module.exports = class extends Base {
         if (!think.isEmpty(status)) {
             query.where({ "v_main.status": status });
             query01.where({ "v_main.status": status });
+        }
+        // 时间code
+        if (!think.isEmpty(timecode)) {
+            query.where({ "v_main.time_code": ['in', timecode] });
+            query01.where({ "v_main.time_code": ['in', timecode] });
+        }
+        // 预约日期搜索
+        if (!think.isEmpty(orderTime)) {
+            query.where({ "v_main.order_time": orderTime });
+            query01.where({ "v_main.order_time": orderTime });
         }
 
         let data = await query.field("v_main.id AS id,v_main.order_code AS order_code,"
@@ -296,7 +322,7 @@ module.exports = class extends Base {
         //获取查询条件
 
         //获取查询条件
-        let studensPhone = this.post("studentsPhone");//学员电话
+        let studentsName = this.post("studentsName");//学员姓名
         let coachId = this.post("coachId");//教练card
         let ordersNum = this.post("ordersNum");//订单编号
         let coachPhone = this.post("coachPhone");//教练电话
@@ -306,23 +332,36 @@ module.exports = class extends Base {
         const query01 = this.model("v_main");
         let type = this.post("type");//账号查看订单的类型
         let status = this.post("status");//账号查看订单的类型
-
-        if (!think.isEmpty(studensPhone)) {
-            query.where({ "v_main.tel": ["like", "%" + studensPhone + "%"] });
-            query01.where({ "v_main.tel": ["like", "%" + studensPhone + "%"] });
+        let coachName = this.post("coachName");//教练姓名
+        //  时间code
+        let timecode = this.post("timecode");
+        let orderTime = this.post("orderTime");
+        //  学员姓名
+        if (!think.isEmpty(studentsName)) {
+            query.where({ "v_main.student_name": ["like", "%" + studentsName + "%"] });
+            query01.where({ "v_main.student_name": ["like", "%" + studentsName + "%"] });
         }
+        //  教练id
         if (!think.isEmpty(coachId)) {
             query.where({ "v_main.coach_card": coachId });
             query01.where({ "v_main.coach_card": coachId });
         }
+        // 订单编号
         if (!think.isEmpty(ordersNum)) {
             query.where({ "v_main.order_code": ordersNum });
             query01.where({ "v_main.order_code": ordersNum });
         }
+        // 教练电话
         if (!think.isEmpty(coachPhone)) {
             query.where({ "v_main.phone": coachPhone });
             query01.where({ "v_main.phone": coachPhone });
         }
+        // 教练姓名
+        if (!think.isEmpty(coachName)) {
+            query.where({ "v_main.coach_name": coachName });
+            query01.where({ "v_main.coach_name": coachName });
+        }
+
         if (!think.isEmpty(type)) {
             query.where({ "v_main.suject": type });
             query01.where({ "v_main.suject": type });
@@ -331,6 +370,17 @@ module.exports = class extends Base {
             query.where({ "v_main.status": status });
             query01.where({ "v_main.status": status });
         }
+        // 时间code
+        if (!think.isEmpty(timecode)) {
+            query.where({ "v_main.time_code": ['in', timecode] });
+            query01.where({ "v_main.time_code": ['in', timecode] });
+        }
+        // 预约日期搜索
+        if (!think.isEmpty(orderTime)) {
+            query.where({ "v_main.order_time": orderTime });
+            query01.where({ "v_main.order_time": orderTime });
+        }
+
 
         let data = await query.field("v_main.id AS id,v_main.order_code AS order_code,"
             + "v_main.order_type AS order_type,v_main.order_check AS order_check,v_main.suject AS suject,v_main.coach_name AS coach_name,v_main.coach_card AS coach_card," +
@@ -540,13 +590,17 @@ module.exports = class extends Base {
         if (think.isEmpty(data)) {
             return this.fail(1000, "不存在学生信息");
         }
+         // 获取系统当前月份第一天
+         let firstDay = moment(new Date()).startOf('month').format("YYYY-MM-DD");
+         // 获取系统当前月份最后一天
+         let endDay = moment(new Date()).endOf('month').format("YYYY-MM-DD");
         let orderCode = "";
         if (type == 1) {
             //打单 完成
             for (let index = 0; index < id.length; index++) {
                 const element = id[index];
                 // let countSize=await this.model("order_timetable").where({ orders_id: orderId, print: 1 }).count();
-                let ordersCountByDate = await this.model("order_timetable").where("DATE_FORMAT(update_time,'%Y-%M-%D')" + "=DATE_FORMAT('" + moment().format("YYYY-MM-DD") + "','%Y-%M-%D')").count();
+                let ordersCountByDate =await this.model("order_timetable").where("DATE_FORMAT(update_time,'%Y-%M-%D')" + ">= DATE_FORMAT('" + firstDay + "','%Y-%M-%D')  and  DATE_FORMAT(update_time,'%Y-%M-%D')" + "<= DATE_FORMAT('" + endDay+ "','%Y-%M-%D')").count();
                 orderCode = "A" + this.random_No(ordersCountByDate + 1);
                 await this.model("order_timetable").where({ id: element }).update({
                     print: 1,
@@ -997,9 +1051,9 @@ module.exports = class extends Base {
                 "mch_id": "1550213571",//商户号id
                 "nonce_str": wxutil.randomChar(32),//随机字符串
                 "out_trade_no": payment.out_trade_no, // 商户订单号
-                "total_fee": order.collection * 100,//order.collection * 100, //订单定金金额
+                "total_fee": orders.collection * 100,//order.collection * 100, //订单定金金额
                 "out_refund_no": out_return_trade_no, //退款订单号
-                "refund_fee": order.order_rebates * 100   //退款金额
+                "refund_fee": orders.order_rebates * 100   //退款金额
             };
             console.log("生成订单参数组装:" + JSON.stringify(refund_orders))
             //调用支付统一下单api() 微信后台
@@ -1073,10 +1127,14 @@ module.exports = class extends Base {
      */
     random_No(num) {
         if (num.toString().length == 1) {
-            num = "000" + num;
+            num = "00000" + num;
         } else if (num.toString().length == 2) {
-            num = "00" + num;
+            num = "0000" + num;
         } else if (num.toString().length == 3) {
+            num = "000" + num;
+        }else if (num.toString().length == 4) {
+            num = "00" + num;
+        }else if (num.toString().length == 5) {
             num = "0" + num;
         }
         const now = new Date()
@@ -1251,12 +1309,14 @@ module.exports = class extends Base {
 
 
     async demoAction() {
-        var create_time = "2020-06-17 14:07:05";
-        var createTime = moment(create_time).add(15, "minutes"); // 15分钟
-        var newDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-        console.log(newDate + "-------------------------" + (createTime).format("YYYY-MM-DD HH:mm:ss"));
-        console.log(moment(newDate).isAfter(createTime));
-
+         // 获取系统当前月份第一天
+         let firstDay = moment(new Date()).startOf('month').format("YYYY-MM-DD");
+         // 获取系统当前月份最后一天
+         let endDay = moment(new Date()).endOf('month').format("YYYY-MM-DD");
+                let ordersCountByDate = await this.model("order_timetable").where("DATE_FORMAT(update_time,'%Y-%M-%D')" + ">= DATE_FORMAT('" + firstDay + "','%Y-%M-%D')  and  DATE_FORMAT(update_time,'%Y-%M-%D')" + "<= DATE_FORMAT('" + endDay+ "','%Y-%M-%D')").count();
+              let  orderCode = "A" + this.random_No(ordersCountByDate + 1);
+           
+        return this.success(orderCode);
 
     }
 

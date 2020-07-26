@@ -24,7 +24,7 @@ exports.cache = {
 };
 
 /**
- * model adapter config  msc.trackin.me  localhost
+ * model adapter config  msc.trackin.me  localhost 47.115.22.101
  * @type {Object}
  */
 exports.model = {
@@ -39,7 +39,7 @@ exports.model = {
     database: 'drive',
     prefix: '',
     encoding: 'utf8',
-    host: 'msc.trackin.me',
+    host: 'localhost',
     port: '3306',
     user: 'dv_dev',
     password: 'wm_200428',
