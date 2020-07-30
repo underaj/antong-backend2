@@ -9,6 +9,7 @@ var wxutil = require("../utils/wxUtils");
 let request = require('request');
 const fs = require("fs");
 const path = require("path");
+var gettime = require('../util/convert');
 
 
 
@@ -97,7 +98,7 @@ module.exports = class extends Base {
 
         let data = await query.field("v_main.id AS id,v_main.order_code AS order_code,"
             + "v_main.order_type AS order_type,v_main.order_check AS order_check,v_main.suject AS suject,v_main.coach_name AS coach_name,v_main.coach_card AS coach_card," +
-            "v_main.collection_type AS collection_type,v_main.status as status, GROUP_CONCAT( DISTINCT v_main.`time_code`) AS time_code,GROUP_CONCAT( CONCAT_WS(':',v_main.student_name,v_main.tel) ORDER BY v_main.id ASC SEPARATOR ',') as students"
+            "v_main.collection_type AS collection_type,v_main.pay_type as pay_type,v_main.status as status, GROUP_CONCAT( DISTINCT v_main.`time_code`) AS time_code,GROUP_CONCAT( CONCAT_WS(':',v_main.student_name,v_main.tel) ORDER BY v_main.id ASC SEPARATOR ',') as students"
             +
             ",v_main.phone as phone,v_main.is_return as is_return,v_main.order_time as order_time,v_main.create_time as create_time,v_main.coachId"
         ).group("v_main.id")
@@ -233,7 +234,7 @@ module.exports = class extends Base {
         * 科目3  定金 每60分钟 80元   返点 每60分钟60元
         * data.type  1  科目2  2科目3
         */
-        if (data.type === 1) {
+        if (data.type == 1) {
             countAmount = parameter.length * 80;
             returnAmount = parameter.length * 40;
         } else {
@@ -466,9 +467,76 @@ module.exports = class extends Base {
         let dateloge = data.dateloge;
         //关联车辆信息查询
         let carDetail = this.model("v_orders");
-
+        // 时间过滤
+        let nowDay = moment(new Date()).format("YYYY-MM-DD");
+        nowDay = moment(nowDay).unix();
+        // 当前时间的小时
+        let nowHoure = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+        nowHoure = moment(nowHoure).unix();
+        // 判断日期是否是当天日期   如果是当天日期进行数据过滤
+        // 将传入的日期 转为 时间戳  
+        let inputDate = moment(date).unix();
+        let code;
+        // 判断是否是等于今天
+        if (inputDate == nowDay) {
+            console.log("进入");
+            var dayTime = date + " " + "12:00:00";
+            dayTime = moment(dayTime).unix();
+            // 晚上
+            var afterTime = date + " " + "18:00:00";
+            afterTime = moment(afterTime).unix();
+             // 晚上
+             var nightTime = date + " " + "24:00:00";
+             nightTime = moment(nightTime).unix();
+            // 科目二
+             var eghitTime = date + " " + "20:00:00";
+             eghitTime = moment(eghitTime).unix();
+            let timecode;
+             // 当前时间的在哪个时间范围内 并且 是上午还是下午
+      
+            // 判断获取科目二的时间code还是科目三的时间code
+            let timecodeGroup;
+            if (subject == 1) {
+                if (nowHoure > dayTime  && nowHoure < nightTime) {   
+                    timecode = 2;
+                }else {
+                    timecode = 1;
+                }
+                timecodeGroup = gettime.twoTimeCode;
+            } else {
+                timecodeGroup = gettime.threeTimeCode;
+                if (nowHoure > dayTime  && nowHoure < afterTime) {   
+                    timecode = 2;
+                }else if( nowHoure > afterTime && nowHoure < nightTime) {
+                    timecode = 3;
+                }else {
+                    timecode = 1;
+                }
+            }
+            console.log(timecode)
+            for (let index = 0; index < timecodeGroup.length; index++) {
+                const element = timecodeGroup[index];
+                // 取出时间区间 判断当前时间在哪个时间段中
+                var startTime = date + " " + element.startTime+":00";
+                var endTime = date + " " + element.endTime+":00";
+                startTime = moment(startTime).unix();
+                endTime = moment(endTime).unix();
+                if ((startTime <= nowHoure && nowHoure <= endTime) && timecode == element.date_logo) {
+                    console.log("进入赋值" +element.code)
+                    code = element.code;
+                    break;
+                }
+                
+                if(timecode == 2 && subject == 1 && nowHoure > eghitTime){
+                    console.log("进入赋值" +element.code)
+                    code = 27;
+                    break;
+                }
+                 
+            }
+        }
         let query = this.model("timetable")
-            .join("(SELECT timetable_detail.date_logo,timetable_detail.timetable_id,COUNT(1) AS num  FROM timetable_detail  where timetable_detail.is_available=0 AND timetable_detail.is_delete=0 GROUP BY date_logo,timetable_id) b  ON timetable.id=b.timetable_id  ");
+            .join(" timetable_detail b  ON timetable.id=b.timetable_id  ");
         if (!think.isEmpty(date)) {
             query.where({ "timetable.date": date });
             carDetail.where({ "v_orders.date": date });
@@ -477,7 +545,12 @@ module.exports = class extends Base {
             query.where({ "b.date_logo": dateloge });
             carDetail.where({ "v_orders.date_logo": dateloge });
         }
-        let msg = await query.where({ "timetable.type": subject }).field("timetable.type,timetable.date,b.date_logo,SUM(num) AS num").group("date_logo").select();
+        if (!think.isEmpty(code)) {
+
+            query.where({ "b.timecode": [">", code] });
+            carDetail.where({ "timecode": [">", code] });
+        }
+        let msg = await query.where({ "timetable.type": subject }).field("timetable.type,timetable.date,b.date_logo,SUM(1) AS num").group("date_logo").select();
         //关联车辆信息查询
         let detail = await carDetail.where({ "type": subject, "is_available": 0, "is_delete": 0 }).select();
         return this.success({
@@ -590,17 +663,17 @@ module.exports = class extends Base {
         if (think.isEmpty(data)) {
             return this.fail(1000, "不存在学生信息");
         }
-         // 获取系统当前月份第一天
-         let firstDay = moment(new Date()).startOf('month').format("YYYY-MM-DD");
-         // 获取系统当前月份最后一天
-         let endDay = moment(new Date()).endOf('month').format("YYYY-MM-DD");
+        // 获取系统当前月份第一天
+        let firstDay = moment(new Date()).startOf('month').format("YYYY-MM-DD");
+        // 获取系统当前月份最后一天
+        let endDay = moment(new Date()).endOf('month').format("YYYY-MM-DD");
         let orderCode = "";
         if (type == 1) {
             //打单 完成
             for (let index = 0; index < id.length; index++) {
                 const element = id[index];
                 // let countSize=await this.model("order_timetable").where({ orders_id: orderId, print: 1 }).count();
-                let ordersCountByDate =await this.model("order_timetable").where("DATE_FORMAT(update_time,'%Y-%M-%D')" + ">= DATE_FORMAT('" + firstDay + "','%Y-%M-%D')  and  DATE_FORMAT(update_time,'%Y-%M-%D')" + "<= DATE_FORMAT('" + endDay+ "','%Y-%M-%D')").count();
+                let ordersCountByDate = await this.model("order_timetable").where("DATE_FORMAT(update_time,'%Y-%M-%D')" + ">= DATE_FORMAT('" + firstDay + "','%Y-%M-%D')  and  DATE_FORMAT(update_time,'%Y-%M-%D')" + "<= DATE_FORMAT('" + endDay + "','%Y-%M-%D')").count();
                 orderCode = "A" + this.random_No(ordersCountByDate + 1);
                 await this.model("order_timetable").where({ id: element }).update({
                     print: 1,
@@ -683,6 +756,7 @@ module.exports = class extends Base {
         let coachId = data.coachId;
         let pageIndex = this.post("pageIndex");
         let pageSize = this.post("pageSize");
+        let type = data.type;
         if (think.isEmpty(coachId)) {
             return this.fail(1000, "教练id不能为空");
         }
@@ -694,30 +768,34 @@ module.exports = class extends Base {
         //  ["全部订单", "待支付", "已支付定金", "已支付尾款"],0，1，2，3
         let ordersModeld = this.model("v_main");
         let or = this.model("v_main");
-        let type = data.type;
-        if (!think.isEmpty(type)) {
+
+      
+        if ( !think.isEmpty(type) ) {
             if (type == 1) {
                 //待支付
-                ordersModeld.where({ pay_type: 2, collection_type: 1, status: 1 });
-                or.where({ pay_type: 2, collection_type: 1, status: 1 });
-            } else if (type == 2) {
+                ordersModeld.where({ "pay_type": 2, "collection_type": ["in" ,"1,4"], "status": 1 });
+                or.where({ "pay_type": 2, "collection_type": 1, "status": 1 });
+            }else if (type == 2) {
                 //已支付定金
-                ordersModeld.where({ pay_type: 1, collection_type: 1, status: 1 });
-                or.where({ pay_type: 1, collection_type: 1, status: 1 });
+                ordersModeld.where({ "pay_type": 1, "collection_type": 1, "status": 1 });
+                or.where({ "pay_type": 1, "collection_type": 1, "status": 1 });
+                
             } else if (type == 3) {
                 //已支付尾款
-                ordersModeld.where({ pay_type: 1, collection_type: 2, status: 1 });
-                or.where({ pay_type: 1, collection_type: 2, status: 1 });
+                ordersModeld.where({ "pay_type": 1, "collection_type": 2, "status": 1 });
+                or.where({ "pay_type": 1, "collection_type": 2, "status": 1 });
             }
         }
+       
         //status  0 未知  1 待支付  2 已支付尾款  3 已支付
         let orders = await ordersModeld.join("car ON v_main.car_id=car.id")
             .where({ "v_main.coachId": coachId })
             .field("v_main.id,v_main.order_code,v_main.suject ,v_main.order_time as order_time,v_main.pay_type,v_main.collection_type,GROUP_CONCAT( CONCAT_WS(':',v_main.student_name,v_main.tel,car.car_no,car.car_type,v_main.student_id,v_main.time_code)ORDER BY v_main.id ASC SEPARATOR ',') as students ,v_main.create_time as create_time"
                 +
-                ",(CASE WHEN v_main.pay_type=1 AND v_main.collection_type=1  AND v_main.status=1 THEN 2 WHEN  v_main.pay_type=2 AND v_main.collection_type=1 AND v_main.status=1 THEN 1 WHEN  v_main.pay_type=1 AND v_main.collection_type=2 AND v_main.status=1 THEN 3 WHEN  v_main.pay_type=3 AND v_main.collection_type=1  AND v_main.status=1  THEN 4 WHEN v_main.pay_type=1 AND v_main.collection_type=3 AND v_main.status=1 THEN 6   WHEN v_main.status=2 THEN 5 ELSE 0 END) AS STATUS"
+                ",(CASE WHEN v_main.pay_type=1 AND v_main.collection_type=1  AND v_main.status=1 THEN 2 WHEN  v_main.pay_type=2 AND v_main.collection_type=1  AND v_main.status=1 THEN 1 WHEN  v_main.pay_type=2 AND v_main.collection_type=4  AND v_main.status=1 THEN 1 WHEN  v_main.pay_type=1 AND v_main.collection_type=2 AND v_main.status=1 THEN 3 WHEN  v_main.pay_type=3 AND v_main.collection_type=1  AND v_main.status=2  THEN 4 WHEN v_main.pay_type=1 AND v_main.collection_type=3 AND v_main.status=1 THEN 6   WHEN v_main.status=2 THEN 5 ELSE 0 END) AS STATUS"
             )
             .group("v_main.id").order("v_main.create_time DESC").page(pageIndex, pageSize).countSelect();
+
         let countsize = await or.where({ "v_main.coachId": coachId }).count("DISTINCT id");
         return this.success({
             "data": orders,
@@ -860,7 +938,7 @@ module.exports = class extends Base {
         * 科目3  定金 每60分钟 80元   返点 每60分钟60元
         * data.type  1  科目2  2科目3
         */
-        if (data.type === 1) {
+        if (data.type == 1) {
             countAmount = parameter.length * 80;
             returnAmount = parameter.length * 40;
         } else {
@@ -884,7 +962,7 @@ module.exports = class extends Base {
             order_rebates: returnAmount,//返点金额
             create_by: "admin", //创建人
             create_time: moment(new Date()).format("YYYY-MM-DD HH:mm:ss"), //创建时间
-            collection_type: collection_type,
+            collection_type: 4,
             is_traveler: data.coachId == "" ? 1 : 0,
             status: 1
         });
@@ -923,7 +1001,7 @@ module.exports = class extends Base {
 
 
     /**
-    * 返点操作
+    * 
     */
     async returnAmountAction(orderId) {
         //获取订单号
@@ -1045,15 +1123,17 @@ module.exports = class extends Base {
             }
             //商家退款订单号
             let out_return_trade_no = wxutil.guid();
+            console.log(orders)
             //组装退款参数信息
             var refund_orders = {
                 "appid": "wxedecb11f0d2bd76e", //小程序id
-                "mch_id": "1550213571",//商户号id
+                "mch_id": "1550213571",//商户号idunz
                 "nonce_str": wxutil.randomChar(32),//随机字符串
                 "out_trade_no": payment.out_trade_no, // 商户订单号
                 "total_fee": orders.collection * 100,//order.collection * 100, //订单定金金额
                 "out_refund_no": out_return_trade_no, //退款订单号
-                "refund_fee": orders.order_rebates * 100   //退款金额
+                "refund_fee": orders.order_rebates * 100  //退款金额
+               // "notify_url": "https://mmantong.com/practice/pay/returnRefund"  // 微信退款回调地址 https://mmantong.com/practice/pay/returnRefund
             };
             console.log("生成订单参数组装:" + JSON.stringify(refund_orders))
             //调用支付统一下单api() 微信后台
@@ -1091,29 +1171,30 @@ module.exports = class extends Base {
             // 判断result返回的code是否成功，成功则对payment表进行数据插入
             if (result.xml.result_code == "SUCCESS") {
                 //更新主表的状态
-                await this.model("orders").where({ id: payment.orders_id }).update({ pay_type: 3, is_return: 1 });
+                await this.model("orders").where({ id: payment.orders_id }).update({ is_return: 1 });
                 //添加退款记录信息
                 await this.model("refund").add({
                     out_trade_no: payment.out_trade_no,//商户订单号
                     amount: payment.amount,//退款金额
-                    response: JSON.stringify(data),//返回响应
+                    response: "",//返回响应
                     create_time: moment(new Date()).format("YYYY-MM-DD HH:mm:ss"),//创建时间
-                    status: result.xml.return_code,//返回状态信息
-                    order_timetable_id: payment.orders_id //订单id
+                    status: "",//返回状态信息
+                    order_timetable_id: payment.orders_id, //订单id
+                    out_refund_no: result.xml.refund_id  // 微信退款单号
                 });
+                return this.success(result);
             } else {
-                //添加退款记录信息
-                await this.model("refund").add({
-                    out_trade_no: payment.out_trade_no,//商户订单号
-                    amount: payment.amount,//退款金额
-                    response: JSON.stringify(data),//返回响应
-                    create_time: moment(new Date()).format("YYYY-MM-DD HH:mm:ss"),//创建时间
-                    status: result.xml.return_code,//返回状态信息
-                    order_timetable_id: payment.orders_id //订单id
-                });
-
+                // //添加退款记录信息
+                // await this.model("refund").add({
+                //     out_trade_no: payment.out_trade_no,//商户订单号
+                //     amount: payment.amount,//退款金额
+                //     response: JSON.stringify(data),//返回响应
+                //     create_time: moment(new Date()).format("YYYY-MM-DD HH:mm:ss"),//创建时间
+                //     status: result.xml.return_code,//返回状态信息
+                //     order_timetable_id: payment.orders_id //订单id
+                // });
+                return this.fail(1000, "FAIL");
             }
-            console.log("订单编号为:" + element.id + "结束" + element);
         }
     }
 
@@ -1132,9 +1213,9 @@ module.exports = class extends Base {
             num = "0000" + num;
         } else if (num.toString().length == 3) {
             num = "000" + num;
-        }else if (num.toString().length == 4) {
+        } else if (num.toString().length == 4) {
             num = "00" + num;
-        }else if (num.toString().length == 5) {
+        } else if (num.toString().length == 5) {
             num = "0" + num;
         }
         const now = new Date()
@@ -1308,17 +1389,7 @@ module.exports = class extends Base {
 
 
 
-    async demoAction() {
-         // 获取系统当前月份第一天
-         let firstDay = moment(new Date()).startOf('month').format("YYYY-MM-DD");
-         // 获取系统当前月份最后一天
-         let endDay = moment(new Date()).endOf('month').format("YYYY-MM-DD");
-                let ordersCountByDate = await this.model("order_timetable").where("DATE_FORMAT(update_time,'%Y-%M-%D')" + ">= DATE_FORMAT('" + firstDay + "','%Y-%M-%D')  and  DATE_FORMAT(update_time,'%Y-%M-%D')" + "<= DATE_FORMAT('" + endDay+ "','%Y-%M-%D')").count();
-              let  orderCode = "A" + this.random_No(ordersCountByDate + 1);
-           
-        return this.success(orderCode);
 
-    }
 
 
 };

@@ -23,8 +23,8 @@ exports.cache = {
   }
 };
 
-/**
- * model adapter config  msc.trackin.me  localhost 47.115.22.101
+/** 
+ * model adapter config   47.115.22.101 msc.trackin.me  
  * @type {Object}
  */
 exports.model = {

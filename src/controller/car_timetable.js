@@ -111,7 +111,7 @@ module.exports = class extends Base {
                     if (!think.isEmpty(use_car)) {
                         //只存在上下午中会有时间重叠的现象
                         // if (element.datelogo == 2 || element.datelogo == 1) {
-                            console.info("取出的时间code=============>"+element.timecode)
+                        console.info("取出的时间code=============>" + element.timecode)
                         let is_exit = this.getCode(element.timecode);
                         console.log("取出的时间为:" + is_exit);
                         //如果等于1 说明时间值存在在定义的数组里面
@@ -407,7 +407,7 @@ module.exports = class extends Base {
                                 timetable_id: use_car.id,
                                 // date_logo: element.date_logo,
                                 timecode: ["in", this.getTime(element.timecode)],
-                                is_delete:0
+                                is_delete: 0
                             }).find();
                             //如果不等于空说明有时间重合的部分
                             if (!think.isEmpty(infomation)) {
@@ -521,7 +521,7 @@ module.exports = class extends Base {
 
     getCode(num) {
         //定义一个数组
-        var arr = new Array(1,2, 3, 4, 5,6,7,8, 9, 10,13,14,15,16, 17, 18, 19, 20, 21,22,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39);
+        var arr = new Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39);
         var flag = 0;
         for (let i = 0; i < arr.length; i++) {
             if (arr[i] == num) {
@@ -552,7 +552,7 @@ module.exports = class extends Base {
 
             "24": "38", "25": "38",
             "26": "39", "27": "39",
-        
+
 
             "28": "1,2", "29": "3,4",
             "30": "5,6", "31": "7,8",
@@ -572,7 +572,7 @@ module.exports = class extends Base {
 
     convertutil(code, type) {
         var data = "";
-        var timecode ;
+        var timecode;
         if (code > 27) {
             timecode = gettime.threeTimeCode;
         } else {
@@ -583,11 +583,14 @@ module.exports = class extends Base {
             if (element.code == code) {
                 data = element.time;
                 return data;
-              
+
             }
         }
         return data;
     }
 
+    async demoAction() {
+      
+    }
 
 };

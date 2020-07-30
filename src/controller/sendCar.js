@@ -27,7 +27,7 @@ module.exports = class extends Base {
              const element = data[index];
              //拿到时间code 循环查询组装 [code：1 data:{1,2,3}]
              let sms=await this.model("v_sho")
-             .where({"car_id":element.car_id,"order_time":date,"sbject":type,"ordertype":2,"statusd":1}).field("name,time_code,name AS coachName")
+             .where({"car_id":element.car_id,"order_time":date,"sbject":type,"ordertype":['in','1,2'],"statusd":1}).field("name,time_code,coachName AS coachName")
              .union("SELECT name,time_code,v_sho.coachName AS coachName  from v_sho where car_id ="+element.car_id +" and order_time='"+date+"' and sbject='"+type +"' and ordertype=1 and statusd =1  and typed= 1")
             .union("SELECT name,time_code,v_sho.coachName AS coachName  from v_sho where car_id ="+element.car_id +" and order_time='"+date+"' and sbject='"+type +"' and ordertype=3 and statusd =1  and order_check= 1")
             .select();
