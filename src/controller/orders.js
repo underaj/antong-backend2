@@ -550,7 +550,7 @@ module.exports = class extends Base {
             query.where({ "b.timecode": [">", code] });
             carDetail.where({ "timecode": [">", code] });
         }
-        let msg = await query.where({ "timetable.type": subject }).field("timetable.type,timetable.date,b.date_logo,SUM(1) AS num").group("date_logo").select();
+        let msg = await query.where({ "timetable.type": subject ,"b.is_available":0,"b.is_delete":0}).field("timetable.type,timetable.date,b.date_logo,SUM(1) AS num").group("date_logo").select();
         //关联车辆信息查询
         let detail = await carDetail.where({ "type": subject, "is_available": 0, "is_delete": 0 }).select();
         return this.success({
@@ -1123,16 +1123,15 @@ module.exports = class extends Base {
             }
             //商家退款订单号
             let out_return_trade_no = wxutil.guid();
-            console.log(orders)
             //组装退款参数信息
             var refund_orders = {
                 "appid": "wxedecb11f0d2bd76e", //小程序id
                 "mch_id": "1550213571",//商户号idunz
                 "nonce_str": wxutil.randomChar(32),//随机字符串
                 "out_trade_no": payment.out_trade_no, // 商户订单号
-                "total_fee": orders.collection * 100,//order.collection * 100, //订单定金金额
+                "total_fee": element.collection * 100,//order.collection * 100, //订单定金金额
                 "out_refund_no": out_return_trade_no, //退款订单号
-                "refund_fee": orders.order_rebates * 100  //退款金额
+                "refund_fee": element.order_rebates * 100  //退款金额 orders.order_rebates
                // "notify_url": "https://mmantong.com/practice/pay/returnRefund"  // 微信退款回调地址 https://mmantong.com/practice/pay/returnRefund
             };
             console.log("生成订单参数组装:" + JSON.stringify(refund_orders))

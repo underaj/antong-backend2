@@ -51,7 +51,7 @@ module.exports = class extends Base {
             "total_fee": order.collection * 100,//order.collection * 100, //订单定金金额
             "spbill_create_ip": "127.0.0.1",//调用微信支付api的机器IP地址
             "trade_type": "JSAPI",
-            "notify_url": "https://mmantong.com/practice/pay/returnWeixin",  // 微信回调地址  https://mmantong.com/practice/pay/returnWeixin
+            "notify_url": "https://msc.trackin.me/practice/pay/returnWeixin",  // 微信回调地址  https://mmantong.com/practice/pay/returnWeixin
             "openid": openid, //"oa7Ya43TUMTPk5MA_hJ5-OYZIPN4",  //付款人的openid
             "sign_type": "MD5"
         }
@@ -266,7 +266,7 @@ module.exports = class extends Base {
             "out_trade_no": out_trade_no.out_trade_no, // 商户订单号
             "total_fee": order.collection * 100,//order.collection * 100, //订单定金金额
             "out_refund_no": out_return_trade_no,
-            "refund_fee": order.collection * 100 // 退款金额
+            "refund_fee": order.collection * 100 // 退款金额  order.collection * 100
          //   "notify_url": "https://msc.trackin.me/practice/pay/returnRefund" // 退款回调地址   https://mmantong.com/practice/pay/returnRefund
         }
         console.log("生成订单参数组装:" + JSON.stringify(refund_orders))
