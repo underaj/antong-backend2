@@ -51,7 +51,7 @@ module.exports = class extends Base {
             "total_fee": order.collection * 100,//order.collection * 100, //订单定金金额
             "spbill_create_ip": "127.0.0.1",//调用微信支付api的机器IP地址
             "trade_type": "JSAPI",
-            "notify_url": "https://msc.trackin.me/practice/pay/returnWeixin",  // 微信回调地址  https://mmantong.com/practice/pay/returnWeixin
+            "notify_url": "https://mmantong.com/practice/pay/returnWeixin",  // 微信回调地址  https://mmantong.com/practice/pay/returnWeixin
             "openid": openid, //"oa7Ya43TUMTPk5MA_hJ5-OYZIPN4",  //付款人的openid
             "sign_type": "MD5"
         }

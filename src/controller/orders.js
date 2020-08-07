@@ -673,7 +673,7 @@ module.exports = class extends Base {
             for (let index = 0; index < id.length; index++) {
                 const element = id[index];
                 // let countSize=await this.model("order_timetable").where({ orders_id: orderId, print: 1 }).count();
-                let ordersCountByDate = await this.model("order_timetable").where("DATE_FORMAT(update_time,'%Y-%M-%D')" + ">= DATE_FORMAT('" + firstDay + "','%Y-%M-%D')  and  DATE_FORMAT(update_time,'%Y-%M-%D')" + "<= DATE_FORMAT('" + endDay + "','%Y-%M-%D')").count();
+                let ordersCountByDate = await this.model("order_timetable").where("DATE_FORMAT(update_time,'%Y-%m-%d')" + ">= DATE_FORMAT('" + firstDay + "','%Y-%m-%d')  and  DATE_FORMAT(update_time,'%Y-%m-%d')" + "<= DATE_FORMAT('" + endDay + "','%Y-%m-%d') and print = 1").count();
                 orderCode = "A" + this.random_No(ordersCountByDate + 1);
                 await this.model("order_timetable").where({ id: element }).update({
                     print: 1,
@@ -1100,14 +1100,17 @@ module.exports = class extends Base {
     async autoReturnAmountAction() {
         console.log("开始返点任务~~~~~~~")
         //首先查询所有教练信息  条件:  微信id不能为空  账户状态为审核通过的
-        let coach = await this.model("coach").where({ wx_open_id: ['!=', null], status_flag: 1 }).field("GROUP_CONCAT(id) as id").find();
-        //如果信息为空则直接返回
-        if (think.isEmpty(coach)) {
-            return;
-        }
+        // let coach = await this.model("coach").where({ wx_open_id: ['!=', null], status_flag: 1 }).field("GROUP_CONCAT(id) as id").find();
+        // //如果信息为空则直接返回
+        // if (think.isEmpty(coach)) {
+        //     return;
+        // }
         console.log("教练id------>")
         //然后根据教练信息查询所有订单数据订单   条件:  订单状态为已支付  全款  未返点
-        let orders = await this.model("orders").where({ coach_id: ["in", coach.id], pay_type: 1, is_return: 0, collection_type: 2 }).select();
+        let orders = await this.model("orders").join(" `coach` b ON orders.coach_id = b.id ")
+        .where( "b.status_flag = 1 AND b.wx_open_id IS NOT NULL AND orders.pay_type = 1  AND orders.is_return = 0 AND orders.collection_type = 2 ")
+        .field("orders.*")
+        .select();
         //如果没有订单则不继续执行下去
         if (think.isEmpty(orders)) {
             return;
@@ -1123,6 +1126,7 @@ module.exports = class extends Base {
             }
             //商家退款订单号
             let out_return_trade_no = wxutil.guid();
+           
             //组装退款参数信息
             var refund_orders = {
                 "appid": "wxedecb11f0d2bd76e", //小程序id
@@ -1181,7 +1185,7 @@ module.exports = class extends Base {
                     order_timetable_id: payment.orders_id, //订单id
                     out_refund_no: result.xml.refund_id  // 微信退款单号
                 });
-                return this.success(result);
+                
             } else {
                 // //添加退款记录信息
                 // await this.model("refund").add({
@@ -1192,7 +1196,7 @@ module.exports = class extends Base {
                 //     status: result.xml.return_code,//返回状态信息
                 //     order_timetable_id: payment.orders_id //订单id
                 // });
-                return this.fail(1000, "FAIL");
+              
             }
         }
     }

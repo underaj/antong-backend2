@@ -87,7 +87,7 @@ module.exports = class extends Base {
         for (let index = 0; index < dataDay.length; index++) {
             const element = dataDay[index];
             if (element.type == 1) {
-                 let suject1= await this.model("orders").where({"order_time" :selectDate,"suject": element.type,"pay_type" : 3,"is_return":1,"STATUS":1,"collection_type" : 2}).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
+                 let suject1= await this.model("orders").where({"order_time" :selectDate,"suject": element.type,"pay_type" :  ["in","1,3"],"is_return":1,"STATUS":1,"collection_type" : 2}).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
                 dayAmount.push({
                     "type": element.type,
                     "actule": element.noprint  * 80  +(element.receivable - element.noprint) * (80 + element.payment), // 科目二实际收款  打单数量 + 加上 未打单数量 
@@ -95,7 +95,7 @@ module.exports = class extends Base {
                     "order_rebates": suject1.order_rebates
                 })
             } else {
-                let suject2= await this.model("orders").where({"order_time" :selectDate,"suject": element.type,"pay_type" : 3,"is_return":1,"STATUS":1,"collection_type" : 2}).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
+                let suject2= await this.model("orders").where({"order_time" :selectDate,"suject": element.type,"pay_type" : ["in","1,3"],"is_return":1,"STATUS":1,"collection_type" : 2}).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
                 dayAmount.push({
                     "type": element.type,
                     "actule": element.noprint  * 80  +(element.receivable - element.noprint) * (80 + element.payment),// 科目三实际收款
@@ -126,7 +126,7 @@ module.exports = class extends Base {
         for (let index = 0; index < dataMonth.length; index++) {
             const element = dataMonth[index];
             if (element.type == 1) {
-                let suject1= await this.model("orders").where({"order_time" :{">=":firstDay,"<=": endDay  },"suject": element.type,"pay_type" : 3,"is_return":1,"STATUS":1,"collection_type" : 2}).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
+                let suject1= await this.model("orders").where({"order_time" :{">=":firstDay,"<=": endDay  },"suject": element.type,"pay_type" : ["in","1,3"],"is_return":1,"STATUS":1,"collection_type" : 2}).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
                 monthAmount.push({
                     "type": element.type,
                     "actule": (element.actule * 80) + (element.actule * element.payment)  + element.noprint  * 80, // 科目二实际收款
@@ -134,7 +134,7 @@ module.exports = class extends Base {
                     "order_rebates": suject1.order_rebates
                 })
             } else {
-                let suject2= await this.model("orders").where({"order_time" :{">=":firstDay,"<=": endDay  },"suject": element.type,"pay_type" : 3,"is_return":1,"STATUS":1,"collection_type" : 2}).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
+                let suject2= await this.model("orders").where({"order_time" :{">=":firstDay,"<=": endDay  },"suject": element.type,"pay_type" : ["in","1,3"],"is_return":1,"STATUS":1,"collection_type" : 2}).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
                 monthAmount.push({
                     "type": element.type,
                     "actule": (element.actule * 80) + (element.actule * element.payment)  + element.noprint  * 80,// 科目三实际收款
