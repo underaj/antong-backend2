@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@alicloud/pop-core": "^1.7.9",
+    "ejsexcel": "^3.6.1",
     "fast-xml-parser": "^3.16.0",
     "think-cache": "^1.0.0",
     "think-cache-file": "^1.0.8",

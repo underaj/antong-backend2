@@ -4,6 +4,18 @@
  */
 const Base = require('./base.js');
 var moment = require('moment');
+
+
+const ejsexcel = require("ejsexcel");
+const fs = require("fs");
+const util = require("util");
+const readFileAsync = util.promisify(fs.readFile);
+const writeFileAsync = util.promisify(fs.writeFile);
+var path = require('path');
+
+const excelUtil = require("../utils/excelUtil")
+
+
 module.exports = class extends Base {
 
     /**
@@ -78,28 +90,24 @@ module.exports = class extends Base {
             .where({ "order_time": selectDate, "suject": 1 })
             .union("SELECT 2 AS type,IFNULL(count(1),0) AS actule,IFNULL(SUM(CASE WHEN print = 0 THEN 1 ELSE 0 END),0) AS noprint,IFNULL(COUNT(1), 0) AS receivable,200 AS payment FROM v_sum_orders_amount WHERE order_time = '" + selectDate + "' AND suject = 2 ")
             .select();
-            // 查询返点操作
-            //SELECT IFNULL(SUM(order_rebates),0) AS order_rebates  FROM orders  WHERE order_time = '2020-07-31'  AND pay_type =3 AND is_return=1 AND suject =2 AND STATUS =1  AND collection_type =3  
-            let returnAmount = this.model("orders").where({"pay_type" : 3,"is_return":1,"STATUS":1,"collection_type" : 2});
-
         // 计算当天的实收 和应收
         var dayAmount = [];
         for (let index = 0; index < dataDay.length; index++) {
             const element = dataDay[index];
             if (element.type == 1) {
-                 let suject1= await this.model("orders").where({"order_time" :selectDate,"suject": element.type,"pay_type" :  ["in","1,3"],"is_return":1,"STATUS":1,"collection_type" : 2}).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
+                let suject1 = await this.model("orders").where({ "order_time": selectDate, "suject": element.type, "pay_type": ["in", "1,3"], "is_return": 1, "STATUS": 1, "collection_type": 2 }).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
                 dayAmount.push({
                     "type": element.type,
-                    "actule": element.noprint  * 80  +(element.receivable - element.noprint) * (80 + element.payment), // 科目二实际收款  打单数量 + 加上 未打单数量 
-                    "receivable": (element.receivable * 80) + (element.receivable * element.payment),  // 科目三的应收款 
+                    "actule": element.noprint * 80 + (element.receivable - element.noprint) * (80 + element.payment), // 科目二实际收款  打单数量 + 加上 未打单数量 
+                    "receivable": (element.receivable * 80) + (element.receivable * element.payment),  // 科目二的应收款 
                     "order_rebates": suject1.order_rebates
                 })
             } else {
-                let suject2= await this.model("orders").where({"order_time" :selectDate,"suject": element.type,"pay_type" : ["in","1,3"],"is_return":1,"STATUS":1,"collection_type" : 2}).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
+                let suject2 = await this.model("orders").where({ "order_time": selectDate, "suject": element.type, "pay_type": ["in", "1,3"], "is_return": 1, "STATUS": 1, "collection_type": 2 }).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
                 dayAmount.push({
                     "type": element.type,
-                    "actule": element.noprint  * 80  +(element.receivable - element.noprint) * (80 + element.payment),// 科目三实际收款
-                    "receivable":  (element.actule * ( 80 + element.payment)) ,     // 科目三的应收款 
+                    "actule": element.noprint * 80 + (element.receivable - element.noprint) * (80 + element.payment),// 科目三实际收款
+                    "receivable": (element.actule * (80 + element.payment)),     // 科目三的应收款 
                     "order_rebates": suject2.order_rebates
                 })
             }
@@ -126,18 +134,18 @@ module.exports = class extends Base {
         for (let index = 0; index < dataMonth.length; index++) {
             const element = dataMonth[index];
             if (element.type == 1) {
-                let suject1= await this.model("orders").where({"order_time" :{">=":firstDay,"<=": endDay  },"suject": element.type,"pay_type" : ["in","1,3"],"is_return":1,"STATUS":1,"collection_type" : 2}).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
+                let suject1 = await this.model("orders").where({ "order_time": { ">=": firstDay, "<=": endDay }, "suject": element.type, "pay_type": ["in", "1,3"], "is_return": 1, "STATUS": 1, "collection_type": 2 }).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
                 monthAmount.push({
                     "type": element.type,
-                    "actule": (element.actule * 80) + (element.actule * element.payment)  + element.noprint  * 80, // 科目二实际收款
+                    "actule": (element.actule * 80) + (element.actule * element.payment) + element.noprint * 80, // 科目二实际收款
                     "receivable": (element.receivable * 80) + (element.receivable * element.payment),  // 科目三的应收款 
                     "order_rebates": suject1.order_rebates
                 })
             } else {
-                let suject2= await this.model("orders").where({"order_time" :{">=":firstDay,"<=": endDay  },"suject": element.type,"pay_type" : ["in","1,3"],"is_return":1,"STATUS":1,"collection_type" : 2}).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
+                let suject2 = await this.model("orders").where({ "order_time": { ">=": firstDay, "<=": endDay }, "suject": element.type, "pay_type": ["in", "1,3"], "is_return": 1, "STATUS": 1, "collection_type": 2 }).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
                 monthAmount.push({
                     "type": element.type,
-                    "actule": (element.actule * 80) + (element.actule * element.payment)  + element.noprint  * 80,// 科目三实际收款
+                    "actule": (element.actule * 80) + (element.actule * element.payment) + element.noprint * 80,// 科目三实际收款
                     "receivable": (element.receivable * 80) + (element.receivable * element.payment),// 科目三的应收款 
                     "order_rebates": suject2.order_rebates
                 })
@@ -148,10 +156,44 @@ module.exports = class extends Base {
 
 
 
+    // 文档下载demo
+    async downLoadAction() {
+            // 查询数据信息
+            // let startTime = this.post("startTime");  // 开始时间
+            // let endTime = this.post("endTime");  // 结束时间
+            // let type =this.post("type"); // 科目类型
+
+            // 查询当月数据信息
+        let test =    await this.model("orders").where({ "order_time": { ">=": '2020-10-01', "<=": '2020-10-31' }})
+            .field("order_time,count(1) as amount")
+            .group("order_time").order("order_time").select();
+
+         
+          var msg = [{
+            "ds_year": "2020年10月份",
+            "ds_month":"",
+            "ds_type":"科目2收入明细"
+          }];
+          
+         var data = [];
+
+         data.push(msg);
+         data.push(test);
+
+         var dd = JSON.parse(JSON.stringify(data));
+
+          console.log(dd)
+                 var templatePath = path.resolve(process.cwd() + '/www/static/xlsx/test.xlsx');
+                 var name = "订单列表" + moment().format("YYYYMMDDHHmmss") + ".xlsx";
+                 var excel = await excelUtil.downloadExcels( name,dd, templatePath);
+
+         return this.success(excel);
+
+    }
+
 
 
 
 }
 
 
-     

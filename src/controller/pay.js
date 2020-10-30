@@ -44,7 +44,7 @@ module.exports = class extends Base {
         // 生成商户订单  https://mmantong.com/
         var orders = {
             "appid": "wxedecb11f0d2bd76e", //小程序id
-            "mch_id": "1550213571",//商户号id
+            "mch_id": "1602216256",//商户号id
             "nonce_str": wxutil.randomChar(32),//随机字符串
             "body": "预约退款",//order.id, //商品描述
             "out_trade_no": out_trade_no, // 商户订单号
@@ -75,20 +75,11 @@ module.exports = class extends Base {
                 response: "",//返回响应
                 create_time: moment(new Date()).format("YYYY-MM-DD HH:mm:ss"),//创建日期
                 status: "", //状态
-                openid: openid ,//用户id
+                openid: openid,//用户id
                 formid: msg.prepay_id
             });
             return this.success(result);
         } else {
-            // //返回错误信息
-            // await this.model("payment").add({
-            //     orders_id: order.id,//订单号
-            //     out_trade_no: out_trade_no,//商户订单号
-            //     amount: order.collection,    //订单金额
-            //     response: "",//返回响应
-            //     create_time: moment(new Date()).format("YYYY-MM-DD HH:mm:ss"),//创建日期
-            //     status: "" //状态
-            // });
             return this.fail(1000, msg.return_msg);
         }
 
@@ -102,22 +93,22 @@ module.exports = class extends Base {
         var data = this.post()
         console.info("----------->" + JSON.stringify(data));
         let msg = JSON.parse(JSON.stringify(data.xml));
-        console.log("打印出"+msg)
+        console.log("打印出" + msg)
         if (msg.result_code == "SUCCESS") {
             //通过商户订单号查询订单信息
             let orders = await this.model("payment").where({ out_trade_no: msg.out_trade_no[0] }).find();
             if (think.isEmpty(orders)) {
                 return think.fail(1000, "订单有误");
             }
-             //保留返回信息
-             var returnmsg = {
+            //保留返回信息
+            var returnmsg = {
                 "return_code": "SUCCESS",
                 "return_msg": "OK"
             }
             // 判断订单状态是否改变
-            let exiteOrders= await this.model("orders").where({id: orders.orders_id}).find();
-             // 查询订单是否已完成 
-            if(exiteOrders.pay_type == 1 && exiteOrders.collection_type == 1) {
+            let exiteOrders = await this.model("orders").where({ id: orders.orders_id }).find();
+            // 查询订单是否已完成 
+            if (exiteOrders.pay_type == 1 && exiteOrders.collection_type == 1) {
                 return this.success(wxutil.getXml(returnmsg));
             };
             //更新订单信息
@@ -126,7 +117,7 @@ module.exports = class extends Base {
             await this.model("payment").where({ id: orders.id }).update({
                 status: JSON.parse(JSON.stringify(data.xml)).result_code[0],
                 response: JSON.stringify(msg),
-                transaction_id : JSON.parse(JSON.stringify(data.xml)).transaction_id[0]
+                transaction_id: JSON.parse(JSON.stringify(data.xml)).transaction_id[0]
             });
             //查询订单信息
             let ordersInfo = await this.model("orders").join("coach on orders.coach_id=coach.id").where({ "orders.id": orders.orders_id }).find();
@@ -146,7 +137,7 @@ module.exports = class extends Base {
             // 备注
             let cartype = (studentname.car_status + "").replace(",", "/");
             //获取支付id
-            let ssssss =orders.formid  ;// JSON.parse(JSON.parse(JSON.stringify(orders.response)));
+            let ssssss = orders.formid;// JSON.parse(JSON.parse(JSON.stringify(orders.response)));
             //微信服务通知
             //需要参数  发送模板消息需要用到accesstoken、formId 模板id 和openID 用户ID  
             //获取access_token
@@ -194,7 +185,7 @@ module.exports = class extends Base {
             var tt = await think.fetch("https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=" + result.access_token, { method: 'POST', body: JSON.stringify(returndata) }).then(res => res.text());
             console.log("打印服务通知发送结果" + tt);
             // 更新支付信息
-      
+
             return this.success(wxutil.getXml(returnmsg));
         } else {
             var returnmsg = {
@@ -232,7 +223,7 @@ module.exports = class extends Base {
             return this.fail(1000, "该订单已退款");
         }
         //根据订单号去查询支付订单里面的商户号ID  
-        let out_trade_no = await this.model("payment").where({ orders_id: orderId }).find();
+        let out_trade_no = await this.model("payment").where({ orders_id: orderId, status: "SUCCESS", transaction_id: ['!=', null] }).find();
         if (think.isEmpty(out_trade_no)) {
             return this.fail(1000, "未找到该订单支付信息");
         }
@@ -261,13 +252,12 @@ module.exports = class extends Base {
         //组装退款参数信息
         var refund_orders = {
             "appid": "wxedecb11f0d2bd76e", //小程序id
-            "mch_id": "1550213571",//商户号id
+            "mch_id": "1602216256",//商户号id
             "nonce_str": wxutil.randomChar(32),//随机字符串
             "out_trade_no": out_trade_no.out_trade_no, // 商户订单号
             "total_fee": order.collection * 100,//order.collection * 100, //订单定金金额
             "out_refund_no": out_return_trade_no,
             "refund_fee": order.collection * 100 // 退款金额  order.collection * 100
-         //   "notify_url": "https://msc.trackin.me/practice/pay/returnRefund" // 退款回调地址   https://mmantong.com/practice/pay/returnRefund
         }
         console.log("生成订单参数组装:" + JSON.stringify(refund_orders))
         //调用支付统一下单api() 微信后台
@@ -285,7 +275,7 @@ module.exports = class extends Base {
                 agentOptions: {
                     pfx: fs.readFileSync(path.resolve(process.cwd(), "././src/wx_api/apiclient_cert.p12")),
                     //"D:/Progame Files/vscode/vscode-workspace/practice-car/src/wx_api/apiclient_cert.p12"),
-                    passphrase: "1550213571"
+                    passphrase: "1602216256"
                 },
                 method: 'POST',
                 body: data
@@ -314,7 +304,7 @@ module.exports = class extends Base {
                 response: JSON.stringify(result),//返回响应
                 create_time: moment(new Date()).format("YYYY-MM-DD HH:mm:ss"),//创建时间
                 status: result.xml.return_code,//返回状态信息
-                order_timetable_id: out_trade_no.orders_id ,//订单id
+                order_timetable_id: out_trade_no.orders_id,//订单id
                 out_refund_no: result.xml.refund_id // 微信退款单号 
             });
             return this.success(result.xml.return_msg);
@@ -335,13 +325,10 @@ module.exports = class extends Base {
     /**
      * 微信退款回调
      */
-    async returnRefundAction(){
+    async returnRefundAction() {
         var data = this.post()
-        console.info("----------->" + JSON.stringify(data));
 
         let msg = JSON.parse(JSON.stringify(data.xml));
-
-        console.log("打印出" + msg);
 
         // 错误返回状态码
         var returnErrormsg = {
@@ -359,16 +346,16 @@ module.exports = class extends Base {
                 return this.success(wxutil.getXml(returnErrormsg));
             }
 
-             //保留返回信息
-             var returnmsg = {
+            //保留返回信息
+            var returnmsg = {
                 "return_code": "SUCCESS",
                 "return_msg": "OK"
             }
 
             // 判断订单状态是否改变
-            let exiteOrders= await this.model("orders").where({id: orders.order_timetable_id}).find();
-             // 查询订单是否已完成 
-            if(exiteOrders.pay_type == 3) {
+            let exiteOrders = await this.model("orders").where({ id: orders.order_timetable_id }).find();
+            // 查询订单是否已完成 
+            if (exiteOrders.pay_type == 3) {
                 return this.success(wxutil.getXml(returnmsg));
             };
 
@@ -379,13 +366,13 @@ module.exports = class extends Base {
             await this.model("refund").where({ id: orders.id }).update({
                 status: msg.result_code[0],
                 response: JSON.stringify(data),
-                out_refund_no : msg.transaction_id[0]
+                out_refund_no: msg.transaction_id[0]
             });
             return this.success(wxutil.getXml(returnmsg));
-        }else {
+        } else {
             // 退款操作失败
             return this.fail(wxutil.getXml(returnErrormsg));
-        }    
+        }
     }
 
     /**
@@ -422,7 +409,7 @@ module.exports = class extends Base {
         //组装退款参数信息
         var refund_orders = {
             "appid": "wxedecb11f0d2bd76e", //小程序id
-            "mch_id": "1550213571",//商户号id
+            "mch_id": "1602216256",//商户号id
             "nonce_str": wxutil.randomChar(32),//随机字符串
             "out_trade_no": out_trade_no.out_trade_no, // 商户订单号
             "total_fee": order.collection * 100,//order.collection * 100, //订单定金金额
@@ -432,7 +419,6 @@ module.exports = class extends Base {
         console.log("生成订单参数组装:" + JSON.stringify(refund_orders))
         //调用支付统一下单api() 微信后台
         let data = await wxutil.refundOrder(refund_orders);
-        console.log("------------->" + JSON.stringify(data))
         // //获取返回参数信息
         // let result = JSON.parse(JSON.stringify(data)).xml;
         // //表示退款成功 ，更新主表信息
@@ -444,7 +430,7 @@ module.exports = class extends Base {
                 url: "https://api.mch.weixin.qq.com/secapi/pay/refund",
                 agentOptions: {
                     pfx: fs.readFileSync("D:/Progame Files/vscode/vscode-workspace/practice-car/src/wx_api/apiclient_cert.p12"),
-                    passphrase: "1550213571"
+                    passphrase: "1602216256"
                 },
                 method: 'POST',
                 body: data
@@ -604,8 +590,6 @@ module.exports = class extends Base {
         let array = [token, timestamp, nonce].sort().join('');
         var md5 = crypto.createHash('sha1');
         var result = md5.update(array).digest('hex');
-        console.log("signature---->" + signature);
-        console.log("result---->" + result);
         if (result == signature) {
             return this.ctx.body = echostr;
         } else {
@@ -617,31 +601,28 @@ module.exports = class extends Base {
 
 
 
-    async queryOrdersAction() {
+    // async queryOrdersAction() {
 
-        let studentname = await this.model("orders").
-            join("order_timetable ot ON orders.id=ot.orders_id").
-            join("student st ON ot.students_id=st.student_id")
-            .where({ "orders.id": 131 })
-            .field("GROUP_CONCAT(DISTINCT st.name)AS name ,GROUP_CONCAT( DISTINCT(CASE WHEN st.`car_status` = 1 THEN 'C1' ELSE 'C2' END)) AS car_status ")
-            .find();
-        // 拼接名字
-        let student = (studentname.name + "").replace(",", "/");
-        // 备注
-        let cartype = (studentname.car_status + "").replace(",", "/");
+    //     let studentname = await this.model("orders").
+    //         join("order_timetable ot ON orders.id=ot.orders_id").
+    //         join("student st ON ot.students_id=st.student_id")
+    //         .where({ "orders.id": 131 })
+    //         .field("GROUP_CONCAT(DISTINCT st.name)AS name ,GROUP_CONCAT( DISTINCT(CASE WHEN st.`car_status` = 1 THEN 'C1' ELSE 'C2' END)) AS car_status ")
+    //         .find();
+    //     // 拼接名字
+    //     let student = (studentname.name + "").replace(",", "/");
+    //     // 备注
+    //     let cartype = (studentname.car_status + "").replace(",", "/");
 
-        return this.success(student + "===========>" + cartype)
+    //     return this.success(student + "===========>" + cartype)
 
-    }
+    // }
 
 
 
 
     getCode(params, key) {
-        console.log("--------------->" + params)
-        console.log("--------------->" + key)
         for (let k in params) {
-            console.log(k + "--------------->" + key)
             if (k === key) {
                 return params[k];
             }

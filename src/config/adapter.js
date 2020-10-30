@@ -39,7 +39,7 @@ exports.model = {
     database: 'drive',
     prefix: '',
     encoding: 'utf8',
-    host: 'localhost',
+    host: '47.115.22.101',
     port: '3306',
     user: 'dv_dev',
     password: 'wm_200428',

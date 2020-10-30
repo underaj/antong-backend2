@@ -155,6 +155,7 @@ function parserXml(xmlData) {
  * @returns
  */
 async function getOrder(obj) {
+    console.log("--->"+JSON.stringify(obj))
     var str = await sortString(obj);
     obj.sign = str;
     var xml = getXml(obj);

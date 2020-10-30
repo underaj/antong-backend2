@@ -244,9 +244,13 @@ module.exports = class extends Base {
 
         //最后生成订单 返回结果信息
         let ordersCountByDate = await this.model("orders").where({ order_time: data.date }).count("id");
+
+        // 订单号
+        let order_num = await this.random_No(ordersCountByDate);
+
         //添加订单
         let ordersId = await this.model("orders").add({
-            order_code: this.random_No(ordersCountByDate),//订单编号
+            order_code: order_num,//订单编号
             order_type: data.orderType,//订单类型 1 平售 2 加时 3 福利单
             order_check: 0,//审核状态 只针对福利单 0 未审核 1 已审核
             suject: data.type, //科目
@@ -485,31 +489,31 @@ module.exports = class extends Base {
             // 晚上
             var afterTime = date + " " + "18:00:00";
             afterTime = moment(afterTime).unix();
-             // 晚上
-             var nightTime = date + " " + "24:00:00";
-             nightTime = moment(nightTime).unix();
+            // 晚上
+            var nightTime = date + " " + "24:00:00";
+            nightTime = moment(nightTime).unix();
             // 科目二
-             var eghitTime = date + " " + "20:00:00";
-             eghitTime = moment(eghitTime).unix();
+            var eghitTime = date + " " + "20:00:00";
+            eghitTime = moment(eghitTime).unix();
             let timecode;
-             // 当前时间的在哪个时间范围内 并且 是上午还是下午
-      
+            // 当前时间的在哪个时间范围内 并且 是上午还是下午
+
             // 判断获取科目二的时间code还是科目三的时间code
             let timecodeGroup;
             if (subject == 1) {
-                if (nowHoure > dayTime  && nowHoure < nightTime) {   
+                if (nowHoure > dayTime && nowHoure < nightTime) {
                     timecode = 2;
-                }else {
+                } else {
                     timecode = 1;
                 }
                 timecodeGroup = gettime.twoTimeCode;
             } else {
                 timecodeGroup = gettime.threeTimeCode;
-                if (nowHoure > dayTime  && nowHoure < afterTime) {   
+                if (nowHoure > dayTime && nowHoure < afterTime) {
                     timecode = 2;
-                }else if( nowHoure > afterTime && nowHoure < nightTime) {
+                } else if (nowHoure > afterTime && nowHoure < nightTime) {
                     timecode = 3;
-                }else {
+                } else {
                     timecode = 1;
                 }
             }
@@ -517,22 +521,22 @@ module.exports = class extends Base {
             for (let index = 0; index < timecodeGroup.length; index++) {
                 const element = timecodeGroup[index];
                 // 取出时间区间 判断当前时间在哪个时间段中
-                var startTime = date + " " + element.startTime+":00";
-                var endTime = date + " " + element.endTime+":00";
+                var startTime = date + " " + element.startTime + ":00";
+                var endTime = date + " " + element.endTime + ":00";
                 startTime = moment(startTime).unix();
                 endTime = moment(endTime).unix();
                 if ((startTime <= nowHoure && nowHoure <= endTime) && timecode == element.date_logo) {
-                    console.log("进入赋值" +element.code)
+                    console.log("进入赋值" + element.code)
                     code = element.code;
                     break;
                 }
-                
-                if(timecode == 2 && subject == 1 && nowHoure > eghitTime){
-                    console.log("进入赋值" +element.code)
+
+                if (timecode == 2 && subject == 1 && nowHoure > eghitTime) {
+                    console.log("进入赋值" + element.code)
                     code = 27;
                     break;
                 }
-                 
+
             }
         }
         let query = this.model("timetable")
@@ -550,7 +554,7 @@ module.exports = class extends Base {
             query.where({ "b.timecode": [">", code] });
             carDetail.where({ "timecode": [">", code] });
         }
-        let msg = await query.where({ "timetable.type": subject ,"b.is_available":0,"b.is_delete":0}).field("timetable.type,timetable.date,b.date_logo,SUM(1) AS num").group("date_logo").select();
+        let msg = await query.where({ "timetable.type": subject, "b.is_available": 0, "b.is_delete": 0 }).field("timetable.type,timetable.date,b.date_logo,SUM(1) AS num").group("date_logo").select();
         //关联车辆信息查询
         let detail = await carDetail.where({ "type": subject, "is_available": 0, "is_delete": 0 }).select();
         return this.success({
@@ -669,12 +673,16 @@ module.exports = class extends Base {
         let endDay = moment(new Date()).endOf('month').format("YYYY-MM-DD");
         let orderCode = "";
         if (type == 1) {
+
             //打单 完成
             for (let index = 0; index < id.length; index++) {
                 const element = id[index];
                 // let countSize=await this.model("order_timetable").where({ orders_id: orderId, print: 1 }).count();
                 let ordersCountByDate = await this.model("order_timetable").where("DATE_FORMAT(update_time,'%Y-%m-%d')" + ">= DATE_FORMAT('" + firstDay + "','%Y-%m-%d')  and  DATE_FORMAT(update_time,'%Y-%m-%d')" + "<= DATE_FORMAT('" + endDay + "','%Y-%m-%d') and print = 1").count();
-                orderCode = "A" + this.random_No(ordersCountByDate + 1);
+
+                let order_num = await this.random_No(ordersCountByDate);
+
+                orderCode = "A" + order_num;
                 await this.model("order_timetable").where({ id: element }).update({
                     print: 1,
                     print_num: orderCode, //打印的订单号
@@ -769,24 +777,24 @@ module.exports = class extends Base {
         let ordersModeld = this.model("v_main");
         let or = this.model("v_main");
 
-      
-        if ( !think.isEmpty(type) ) {
+
+        if (!think.isEmpty(type)) {
             if (type == 1) {
                 //待支付
-                ordersModeld.where({ "pay_type": 2, "collection_type": ["in" ,"1,4"], "status": 1 });
+                ordersModeld.where({ "pay_type": 2, "collection_type": ["in", "1,4"], "status": 1 });
                 or.where({ "pay_type": 2, "collection_type": 1, "status": 1 });
-            }else if (type == 2) {
+            } else if (type == 2) {
                 //已支付定金
                 ordersModeld.where({ "pay_type": 1, "collection_type": 1, "status": 1 });
                 or.where({ "pay_type": 1, "collection_type": 1, "status": 1 });
-                
+
             } else if (type == 3) {
                 //已支付尾款
                 ordersModeld.where({ "pay_type": 1, "collection_type": 2, "status": 1 });
                 or.where({ "pay_type": 1, "collection_type": 2, "status": 1 });
             }
         }
-       
+
         //status  0 未知  1 待支付  2 已支付尾款  3 已支付
         let orders = await ordersModeld.join("car ON v_main.car_id=car.id")
             .where({ "v_main.coachId": coachId })
@@ -947,9 +955,11 @@ module.exports = class extends Base {
         }
         //最后生成订单 返回结果信息
         let ordersCountByDate = await this.model("orders").where({ order_time: data.date }).count("id");
+
+        let order_num = await this.random_No(ordersCountByDate);
         //添加订单
         let ordersId = await this.model("orders").add({
-            order_code: this.random_No(ordersCountByDate),//订单编号
+            order_code: order_num,//订单编号
             order_type: data.orderType,//订单类型 1 平售 2 加时 3 福利单
             order_check: 0,//审核状态 只针对福利单 0 未审核 1 已审核
             suject: data.type, //科目
@@ -1005,13 +1015,13 @@ module.exports = class extends Base {
     */
     async returnAmountAction(orderId) {
         //获取订单号
-        console.log("kaishib----------------》");
+
         if (think.isEmpty(orderId)) {
             return this.fail(1000, "orderId 订单不能为空");
         }
         //根据订单号查询订单数据获取订单金额
         let order = await this.model("orders").where({ id: orderId, pay_type: 1, collection_type: 2, is_return: 0 }).find();
-        console.log("kaishib----------------》order" + order);
+
         if (think.isEmpty(order)) {
             return 1;
         }
@@ -1019,7 +1029,7 @@ module.exports = class extends Base {
         if (think.isEmpty(coach)) {
             return 1;
         }
-        console.log("验证信息----------------》");
+
         //根据订单号去查询支付订单里面的商户号ID  
         let out_trade_no = await this.model("payment").where({ orders_id: orderId }).find();
         if (think.isEmpty(out_trade_no)) {
@@ -1030,7 +1040,7 @@ module.exports = class extends Base {
         //组装退款参数信息
         var refund_orders = {
             "appid": "wxedecb11f0d2bd76e", //小程序id
-            "mch_id": "1550213571",//商户号id
+            "mch_id": "1602216256",//商户号id
             "nonce_str": wxutil.randomChar(32),//随机字符串
             "out_trade_no": out_trade_no.out_trade_no, // 商户订单号
             "total_fee": order.collection * 100,//order.collection * 100, //订单定金金额
@@ -1048,7 +1058,7 @@ module.exports = class extends Base {
                 agentOptions: {
                     pfx: fs.readFileSync(path.resolve(process.cwd(), "././src/wx_api/apiclient_cert.p12")),
                     //fs.readFileSync("D:/Progame Files/vscode/vscode-workspace/practice-car/src/wx_api/apiclient_cert.p12"),
-                    passphrase: "1550213571"
+                    passphrase: "1602216256"
                 },
                 method: 'POST',
                 body: data
@@ -1099,18 +1109,11 @@ module.exports = class extends Base {
    */
     async autoReturnAmountAction() {
         console.log("开始返点任务~~~~~~~")
-        //首先查询所有教练信息  条件:  微信id不能为空  账户状态为审核通过的
-        // let coach = await this.model("coach").where({ wx_open_id: ['!=', null], status_flag: 1 }).field("GROUP_CONCAT(id) as id").find();
-        // //如果信息为空则直接返回
-        // if (think.isEmpty(coach)) {
-        //     return;
-        // }
-        console.log("教练id------>")
         //然后根据教练信息查询所有订单数据订单   条件:  订单状态为已支付  全款  未返点
         let orders = await this.model("orders").join(" `coach` b ON orders.coach_id = b.id ")
-        .where( "b.status_flag = 1 AND b.wx_open_id IS NOT NULL AND orders.pay_type = 1  AND orders.is_return = 0 AND orders.collection_type = 2 ")
-        .field("orders.*")
-        .select();
+            .where("b.status_flag = 1 AND b.wx_open_id IS NOT NULL AND orders.pay_type = 1  AND orders.is_return = 0 AND orders.collection_type = 2 ")
+            .field("orders.*")
+            .select();
         //如果没有订单则不继续执行下去
         if (think.isEmpty(orders)) {
             return;
@@ -1126,17 +1129,17 @@ module.exports = class extends Base {
             }
             //商家退款订单号
             let out_return_trade_no = wxutil.guid();
-           
+
             //组装退款参数信息
             var refund_orders = {
                 "appid": "wxedecb11f0d2bd76e", //小程序id
-                "mch_id": "1550213571",//商户号idunz
+                "mch_id": "1602216256",//商户号idunz
                 "nonce_str": wxutil.randomChar(32),//随机字符串
                 "out_trade_no": payment.out_trade_no, // 商户订单号
                 "total_fee": element.collection * 100,//order.collection * 100, //订单定金金额
                 "out_refund_no": out_return_trade_no, //退款订单号
                 "refund_fee": element.order_rebates * 100  //退款金额 orders.order_rebates
-               // "notify_url": "https://mmantong.com/practice/pay/returnRefund"  // 微信退款回调地址 https://mmantong.com/practice/pay/returnRefund
+                // "notify_url": "https://mmantong.com/practice/pay/returnRefund"  // 微信退款回调地址 https://mmantong.com/practice/pay/returnRefund
             };
             console.log("生成订单参数组装:" + JSON.stringify(refund_orders))
             //调用支付统一下单api() 微信后台
@@ -1150,7 +1153,7 @@ module.exports = class extends Base {
                     url: "https://api.mch.weixin.qq.com/secapi/pay/refund",
                     agentOptions: {
                         pfx: fs.readFileSync(path.resolve(process.cwd(), "././src/wx_api/apiclient_cert.p12")),//fs.readFileSync("D:/Progame Files/vscode/vscode-workspace/practice-car/src/wx_api/apiclient_cert.p12"),
-                        passphrase: "1550213571"
+                        passphrase: "1602216256"
                     },
                     method: 'POST',
                     body: data
@@ -1185,7 +1188,7 @@ module.exports = class extends Base {
                     order_timetable_id: payment.orders_id, //订单id
                     out_refund_no: result.xml.refund_id  // 微信退款单号
                 });
-                
+
             } else {
                 // //添加退款记录信息
                 // await this.model("refund").add({
@@ -1196,7 +1199,7 @@ module.exports = class extends Base {
                 //     status: result.xml.return_code,//返回状态信息
                 //     order_timetable_id: payment.orders_id //订单id
                 // });
-              
+
             }
         }
     }
@@ -1209,22 +1212,26 @@ module.exports = class extends Base {
     /**
      * 订单号生成
      */
-    random_No(num) {
-        if (num.toString().length == 1) {
-            num = "00000" + num;
-        } else if (num.toString().length == 2) {
-            num = "0000" + num;
-        } else if (num.toString().length == 3) {
-            num = "000" + num;
-        } else if (num.toString().length == 4) {
-            num = "00" + num;
-        } else if (num.toString().length == 5) {
-            num = "0" + num;
+    async random_No(num) {
+
+        let amountNum ;
+        if (think.isEmpty(num) ||  num == 'null'  ) {
+            amountNum = 5;
+            num = 0;
+        } else {
+            amountNum = 6 - (num + "").length;
         }
-        const now = new Date()
-        let month = moment().month() + 1
-        let day = moment().date()
-        return moment().year().toString() + (month.toString().length < 2 ? "0" + month.toString() : month.toString()) + (day.toString().length < 2 ? "0" + day.toString() : day.toString()) + num;
+
+        let td = await this.random(amountNum);
+        
+        console.log ("td-------------》"+td);
+
+        let orders_num = td + (num + "");
+ 
+
+        let month = moment().month() + 1;
+        let day = moment().date();
+        return moment().year().toString() + (month.toString().length < 2 ? "0" + month.toString() : month.toString()) + (day.toString().length < 2 ? "0" + day.toString() : day.toString()) + orders_num;
     };
 
     /**
@@ -1391,8 +1398,25 @@ module.exports = class extends Base {
     }
 
 
+    async random(l) {
+
+        var x = 'ABCDEFGHLMPQRTUVWYZ';
+        var tmp = '';
+        for (var i = 0; i < l; i++) {
+            tmp += x.charAt(Math.ceil(Math.random() * 100000000) % x.length);
+        }
+  
+        return tmp;
+    }
 
 
+    async demoAction() {
+
+        let num = this.post("num");
+
+        let mm = await this.random_No(num);
+        return this.success(mm);
+    }
 
 
 };
