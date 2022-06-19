@@ -342,8 +342,8 @@ module.exports = class extends Base {
     var demo = this.model("timetable")
       .join("car b ON timetable.car_id=b.id")
       .order("date DESC");
+    
     //判断是否有输入车号
-
     if (!think.isEmpty(id)) {
       demo.where({ "b.car_no": id });
     }
@@ -374,7 +374,7 @@ module.exports = class extends Base {
           "timetable.type": type,
         })
         .order("date DESC")
-        .limit(15)
+        .limit(5)
         .field(
           "DISTINCT timetable.date,timetable.id,GROUP_CONCAT(timetable_detail.id)AS str"
         )
