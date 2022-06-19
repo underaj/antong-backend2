@@ -264,10 +264,22 @@ module.exports = class extends Base {
      */
     async getCarByTypeAction() {
         var type = this.post("type");
+
+        var suject = this.post("suject");
         var queryCarByType = this.model("car").where({ is_delete: 1 });
         if (!think.isEmpty(type)) {
+           
             queryCarByType.where({ car_type: type });
         }
+
+        if(!think.isEmpty(suject)){
+            if(suject == 1){
+                queryCarByType.where({"car_no":["NOTLIKE","K3_%"] });
+            }else{
+                queryCarByType.where({"car_no":["NOTLIKE","K2_%"] });
+            }
+        }
+
         var data = await queryCarByType.select();
         return this.success(data);
 

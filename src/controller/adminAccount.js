@@ -169,6 +169,10 @@ module.exports = class extends Base {
 
   // 查询账户信息（姓名，订单状态）
   async selectAccountAction() {
+
+    let user = await this.session();
+
+    console.log("用户信息:"+JSON.stringify(user));
     var data = this.post();
 
     if (think.isEmpty(data.name)) {
@@ -189,4 +193,6 @@ module.exports = class extends Base {
     }).page(data.pageIndex, data.pageSize).countSelect();
     return this.success(result);
   }
+
+
 };

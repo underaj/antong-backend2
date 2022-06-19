@@ -1,15 +1,15 @@
 
- function convertutil(code) {
-    var data = "";
-    var timecode = twoTimeCode;
-    for (let index = 0; index < timecode.length; index++) {
-        const element = timecode[index];
-        if (element.code == code) {
-            data = element.time;
-            return data;
-        }
+function convertutil(code) {
+  var data = "";
+  var timecode = twoTimeCode;
+  for (let index = 0; index < timecode.length; index++) {
+    const element = timecode[index];
+    if (element.code == code) {
+      data = element.time;
+      return data;
     }
-    return data;
+  }
+  return data;
 }
 
 module.exports.convertutil = convertutil;
@@ -21,7 +21,7 @@ export const twoTimeCode = [
     startTime: '06:30',
     endTime: '07:00',
     unit: 0.5,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 2,
@@ -29,7 +29,7 @@ export const twoTimeCode = [
     startTime: '07:00',
     endTime: '07:30',
     unit: 0.5,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 3,
@@ -37,7 +37,7 @@ export const twoTimeCode = [
     startTime: '07:30',
     endTime: '08:00',
     unit: 0.5,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 4,
@@ -45,15 +45,15 @@ export const twoTimeCode = [
     startTime: '08:00',
     endTime: '08:30',
     unit: 0.5,
-    date_logo:1
+    date_logo: 1
   },
   {
-    code:5,
+    code: 5,
     time: '08:30-09:00',
     startTime: '08:30',
     endTime: '09:00',
     unit: 0.5,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 6,
@@ -61,7 +61,7 @@ export const twoTimeCode = [
     startTime: '09:00',
     endTime: '09:30',
     unit: 0.5,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 7,
@@ -69,7 +69,7 @@ export const twoTimeCode = [
     startTime: '09:30',
     endTime: '10:00',
     unit: 0.5,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 8,
@@ -77,7 +77,7 @@ export const twoTimeCode = [
     startTime: '10:00',
     endTime: '10:30',
     unit: 0.5,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 9,
@@ -85,7 +85,7 @@ export const twoTimeCode = [
     startTime: '10:30',
     endTime: '11:00',
     unit: 0.5,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 10,
@@ -93,7 +93,7 @@ export const twoTimeCode = [
     startTime: '11:00',
     endTime: '11:30',
     unit: 0.5,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 11,
@@ -101,7 +101,7 @@ export const twoTimeCode = [
     startTime: '11:30',
     endTime: '12:00',
     unit: 0.5,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 12,
@@ -109,7 +109,7 @@ export const twoTimeCode = [
     startTime: '12:00',
     endTime: '12:30',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 13,
@@ -117,7 +117,7 @@ export const twoTimeCode = [
     startTime: '12:30',
     endTime: '13:00',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 14,
@@ -125,7 +125,7 @@ export const twoTimeCode = [
     startTime: '13:00',
     endTime: '13:30',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 15,
@@ -133,7 +133,7 @@ export const twoTimeCode = [
     startTime: '13:30',
     endTime: '14:00',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 16,
@@ -141,7 +141,7 @@ export const twoTimeCode = [
     startTime: '14:00',
     endTime: '14:30',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 17,
@@ -149,7 +149,7 @@ export const twoTimeCode = [
     startTime: '14:30',
     endTime: '15:00',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 18,
@@ -157,7 +157,7 @@ export const twoTimeCode = [
     startTime: '15:00',
     endTime: '15:30',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 19,
@@ -165,7 +165,7 @@ export const twoTimeCode = [
     startTime: '15:30',
     endTime: '16:00',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 20,
@@ -173,7 +173,7 @@ export const twoTimeCode = [
     startTime: '16:00',
     endTime: '16:30',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 21,
@@ -181,7 +181,7 @@ export const twoTimeCode = [
     startTime: '16:30',
     endTime: '17:00',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 22,
@@ -189,7 +189,7 @@ export const twoTimeCode = [
     startTime: '17:00',
     endTime: '17:30',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 23,
@@ -197,7 +197,7 @@ export const twoTimeCode = [
     startTime: '17:30',
     endTime: '18:00',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 24,
@@ -205,7 +205,7 @@ export const twoTimeCode = [
     startTime: '18:00',
     endTime: '18:30',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 25,
@@ -213,7 +213,7 @@ export const twoTimeCode = [
     startTime: '18:30',
     endTime: '19:00',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 26,
@@ -221,7 +221,7 @@ export const twoTimeCode = [
     startTime: '19:00',
     endTime: '19:30',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 27,
@@ -229,8 +229,57 @@ export const twoTimeCode = [
     startTime: '19:30',
     endTime: '20:00',
     unit: 0.5,
-    date_logo:2
+    date_logo: 2
   },
+  {
+    code: 42,
+    time: '20:00-20:30',
+    startTime: '20:00',
+    endTime: '20:30',
+    unit: 0.5,
+    date_logo: 2
+  },
+  {
+    code: 43,
+    time: '20:30-21:00',
+    startTime: '20:30',
+    endTime: '21:00',
+    unit: 0.5,
+    date_logo: 2
+  },
+  {
+    code: 44,
+    time: '21:00-21:30',
+    startTime: '21:00',
+    endTime: '21:30',
+    unit: 0.5,
+    date_logo: 2
+  },
+  {
+    code: 45,
+    time: '21:30-22:00',
+    startTime: '21:30',
+    endTime: '22:00',
+    unit: 0.5,
+    date_logo: 2
+  }
+  ,
+  {
+    code: 46,
+    time: '22:00-22:30',
+    startTime: '22:00',
+    endTime: '22:30',
+    unit: 0.5,
+    date_logo: 2
+  },
+  {
+    code: 47,
+    time: '22:30-23:00',
+    startTime: '22:30',
+    endTime: '23:00',
+    unit: 0.5,
+    date_logo: 2
+  }
 ]
 export const threeTimeCode = [
   {
@@ -239,7 +288,7 @@ export const threeTimeCode = [
     startTime: '06:30',
     endTime: '07:30',
     unit: 1,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 29,
@@ -247,7 +296,7 @@ export const threeTimeCode = [
     startTime: '07:30',
     endTime: '08:30',
     unit: 1,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 30,
@@ -255,7 +304,7 @@ export const threeTimeCode = [
     startTime: '08:30',
     endTime: '09:30',
     unit: 1,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 31,
@@ -263,7 +312,7 @@ export const threeTimeCode = [
     startTime: '09:30',
     endTime: '10:30',
     unit: 1,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 32,
@@ -271,7 +320,7 @@ export const threeTimeCode = [
     startTime: '10:30',
     endTime: '11:30',
     unit: 1,
-    date_logo:1
+    date_logo: 1
   },
   {
     code: 33,
@@ -279,7 +328,7 @@ export const threeTimeCode = [
     startTime: '12:30',
     endTime: '13:30',
     unit: 1,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 34,
@@ -287,7 +336,7 @@ export const threeTimeCode = [
     startTime: '13:30',
     endTime: '14:30',
     unit: 1,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 35,
@@ -295,7 +344,7 @@ export const threeTimeCode = [
     startTime: '14:30',
     endTime: '15:30',
     unit: 1,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 36,
@@ -303,7 +352,7 @@ export const threeTimeCode = [
     startTime: '15:30',
     endTime: '16:30',
     unit: 1,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 37,
@@ -311,7 +360,7 @@ export const threeTimeCode = [
     startTime: '16:30',
     endTime: '17:30',
     unit: 1,
-    date_logo:2
+    date_logo: 2
   },
   {
     code: 38,
@@ -319,7 +368,7 @@ export const threeTimeCode = [
     startTime: '18:00',
     endTime: '19:00',
     unit: 1,
-    date_logo:3
+    date_logo: 3
   },
   {
     code: 39,
@@ -327,7 +376,7 @@ export const threeTimeCode = [
     startTime: '19:00',
     endTime: '20:00',
     unit: 1,
-    date_logo:3
+    date_logo: 3
   },
   {
     code: 40,
@@ -335,7 +384,7 @@ export const threeTimeCode = [
     startTime: '20:00',
     endTime: '21:00',
     unit: 1,
-    date_logo:3
+    date_logo: 3
   },
   {
     code: 41,
@@ -343,6 +392,6 @@ export const threeTimeCode = [
     startTime: '21:00',
     endTime: '22:00',
     unit: 1,
-    date_logo:3
-  },
+    date_logo: 3
+  }
 ]

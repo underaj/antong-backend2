@@ -46,7 +46,7 @@ module.exports = class extends Base {
             "appid": "wxedecb11f0d2bd76e", //小程序id
             "mch_id": "1602216256",//商户号id
             "nonce_str": wxutil.randomChar(32),//随机字符串
-            "body": "预约退款",//order.id, //商品描述
+            "body": "预约成功",//order.id, //商品描述
             "out_trade_no": out_trade_no, // 商户订单号
             "total_fee": order.collection * 100,//order.collection * 100, //订单定金金额
             "spbill_create_ip": "127.0.0.1",//调用微信支付api的机器IP地址
@@ -601,24 +601,6 @@ module.exports = class extends Base {
 
 
 
-    // async queryOrdersAction() {
-
-    //     let studentname = await this.model("orders").
-    //         join("order_timetable ot ON orders.id=ot.orders_id").
-    //         join("student st ON ot.students_id=st.student_id")
-    //         .where({ "orders.id": 131 })
-    //         .field("GROUP_CONCAT(DISTINCT st.name)AS name ,GROUP_CONCAT( DISTINCT(CASE WHEN st.`car_status` = 1 THEN 'C1' ELSE 'C2' END)) AS car_status ")
-    //         .find();
-    //     // 拼接名字
-    //     let student = (studentname.name + "").replace(",", "/");
-    //     // 备注
-    //     let cartype = (studentname.car_status + "").replace(",", "/");
-
-    //     return this.success(student + "===========>" + cartype)
-
-    // }
-
-
 
 
     getCode(params, key) {
@@ -633,7 +615,7 @@ module.exports = class extends Base {
     convertutil(code) {
         var data = "";
         var timecode;
-        if (code < 29) {
+        if (code < 29 || code > 41) {
             timecode = gettime.twoTimeCode;
         } else {
             timecode = gettime.threeTimeCode;

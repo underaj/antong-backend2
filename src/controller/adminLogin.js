@@ -22,12 +22,19 @@ module.exports = class extends Base {
       return this.fail('账号或密码错误');
     }
 
-    await this.session(null); // 清空session
-    await this.session({ // 设置session
-      'loginId': user.id,
-      'loginName': user.name,
-      'loginCode': user.code
-    });
+    await this.session(); // 清空session
+    // await this.session({ // 设置session
+    //   'loginId': user.id,
+    //   'loginName': user.name,
+    //   'loginCode': user.code
+    // });
+
+    await this.session('user',user.username+"");
+
+ let id =  await this.session("user");
+
+    console.log("存入session----->" + user.username  +":::"+id);
+
     return this.success(user);
   }
 

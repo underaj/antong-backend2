@@ -1,6 +1,7 @@
 const Base = require('./base.js');
 const moment = require('moment');
 
+
 module.exports = class extends Base {
   indexAction() {
     return this.display();
@@ -15,17 +16,19 @@ module.exports = class extends Base {
     if (think.isEmpty(data.name)) {
       return this.fail('学员姓名不能为空');
     }
-    if (think.isEmpty(data.tel)) {
-      return this.fail('手机号不能为空');
-    }
+    // if (think.isEmpty(data.tel)) {
+    //   return this.fail('手机号不能为空');
+    // }
     if (think.isEmpty(data.carStatus)) {
       return this.fail('车型不能为空');
     }
-
-    var userBySql = await this.model('student').where({tel: data.tel}).find();
-    if (!think.isEmpty(userBySql)) {
-      return this.fail('手机号已绑定');
+    if(!think.isEmpty(data.tel)){
+      var userBySql = await this.model('student').where({tel: data.tel}).find();
+      if (!think.isEmpty(userBySql)) {
+        return this.fail('手机号已绑定');
+      }
     }
+    
 
     var studentId = await this.model('student').add({
       name: data.name,

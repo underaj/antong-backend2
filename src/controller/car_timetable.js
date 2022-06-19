@@ -287,14 +287,17 @@ module.exports = class extends Base {
         let id = this.post("carNo");
 
         //先需要根据条件查询数据信息
-        var demo = this.model("timetable").join("car b ON timetable.car_id=b.id ");
+        var demo = this.model("timetable").join("car b ON timetable.car_id=b.id").order('date DESC').limit(2000);
         //判断是否有输入车号
+        
         if (!think.isEmpty(id)) {
             demo.where({ "b.car_no": id });
         }
         var str = []
         //得到一个集合数据   "timetable.date": ["between", startTime, endTime],
         let tt = await demo.where({ "timetable.type": type, "b.is_delete": 1 }).field("DISTINCT b.id,b.car_no,timetable.car_id").select();
+
+        console.info("checking demo list length", tt.length);
         //如果查询数据为空则直接返回
         if (think.isEmpty(tt)) {
             return this.success(str);
@@ -521,7 +524,8 @@ module.exports = class extends Base {
 
     getCode(num) {
         //定义一个数组
-        var arr = new Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39);
+        var arr = new Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 
+            38, 39,40,41,42,43,44,45);
         var flag = 0;
         for (let i = 0; i < arr.length; i++) {
             if (arr[i] == num) {
@@ -553,6 +557,8 @@ module.exports = class extends Base {
             "24": "38", "25": "38",
             "26": "39", "27": "39",
 
+            "42": "40", "43": "40",
+            "44": "41", "45": "41",
 
             "28": "1,2", "29": "3,4",
             "30": "5,6", "31": "7,8",
@@ -560,7 +566,8 @@ module.exports = class extends Base {
 
             "34": "15,16", "35": "17,18",
             "36": "19,20", "37": "21,22",
-            "38": "24,25", "39": "26,27"
+            "38": "24,25", "39": "26,27",
+            "40": "42,43", "41": "44,45"
         }
         for (var k in time) {
             if (k == key) {
@@ -573,7 +580,7 @@ module.exports = class extends Base {
     convertutil(code, type) {
         var data = "";
         var timecode;
-        if (code > 27) {
+        if (code > 27 && code < 42) {
             timecode = gettime.threeTimeCode;
         } else {
             timecode = gettime.twoTimeCode;
@@ -589,8 +596,5 @@ module.exports = class extends Base {
         return data;
     }
 
-    async demoAction() {
-      
-    }
 
 };

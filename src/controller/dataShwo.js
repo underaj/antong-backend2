@@ -13,8 +13,7 @@ const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
 var path = require('path');
 
-const excelUtil = require("../utils/excelUtil")
-
+const excelUtil = require("../utils/excelUtil");
 
 module.exports = class extends Base {
 
@@ -135,19 +134,27 @@ module.exports = class extends Base {
             const element = dataMonth[index];
             if (element.type == 1) {
                 let suject1 = await this.model("orders").where({ "order_time": { ">=": firstDay, "<=": endDay }, "suject": element.type, "pay_type": ["in", "1,3"], "is_return": 1, "STATUS": 1, "collection_type": 2 }).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
+                // 查询  只付了定金没付尾款  的订单金额   :    统计逻辑为 :  预约了但是没有打单的数据
+                let payAmount = await this.model("v_pay_deposit").where({"order_time":{">=":firstDay ,"<=": endDay},"suject": element.type }).field("IFNULL(SUM(v_pay_deposit.`collection`),0) AS deposit ").find();
+               
                 monthAmount.push({
                     "type": element.type,
                     "actule": (element.actule * 80) + (element.actule * element.payment) + element.noprint * 80, // 科目二实际收款
                     "receivable": (element.receivable * 80) + (element.receivable * element.payment),  // 科目三的应收款 
-                    "order_rebates": suject1.order_rebates
+                    "order_rebates": suject1.order_rebates,
+                    "deposit":payAmount.deposit   // 只付定金没有支付尾款的数据总和
                 })
             } else {
                 let suject2 = await this.model("orders").where({ "order_time": { ">=": firstDay, "<=": endDay }, "suject": element.type, "pay_type": ["in", "1,3"], "is_return": 1, "STATUS": 1, "collection_type": 2 }).field("IFNULL(SUM(order_rebates),0) AS order_rebates ").find();
+               
+                let payAmount = await this.model("v_pay_deposit").where({"order_time":{">=":firstDay ,"<=": endDay},"suject": element.type }).field("IFNULL(SUM(v_pay_deposit.`collection`),0) AS deposit ").find();
+
                 monthAmount.push({
                     "type": element.type,
                     "actule": (element.actule * 80) + (element.actule * element.payment) + element.noprint * 80,// 科目三实际收款
                     "receivable": (element.receivable * 80) + (element.receivable * element.payment),// 科目三的应收款 
-                    "order_rebates": suject2.order_rebates
+                    "order_rebates": suject2.order_rebates,
+                    "deposit":payAmount.deposit   // 只付定金没有支付尾款的数据总和
                 })
             }
         }
@@ -155,39 +162,71 @@ module.exports = class extends Base {
     }
 
 
+    /**
+     *  概况预览  c1  与C2 位置可用统计
+     */
+    async queryIsUseParkingSpaceAction() {
+        // 开始时间   
+        // let startTime = this.post("startTime");
+        // // 结束时间
+        // let endTime = this.post("endTime");
+        let selectDate = moment(this.post("selectDate")).format("YYYY-MM-DD");
+
+        console.log("----------------->"+ selectDate);
+
+        let data = this.model("timetable")
+            .join("timetable_detail td on  timetable.id = td.timetable_id")
+            .join("car ci on timetable.car_id = ci.id")
+            .where("td.is_delete = 0 ");
+        // 获取当前日期
+        let date = moment(new Date()).format("YYYY-MM-DD");
+
+        if (!think.isEmpty(selectDate)) {
+            data.where({ "timetable.date": selectDate})
+        } else {
+            data.where({ "timetable.date": date })
+        }
+
+        let query=await data.field("ci.car_type, timetable.`type` as subject,  COUNT(1) as count ,SUM((CASE WHEN td.is_available = 0 THEN 1 ELSE 0 END))AS is_not_use")
+        .group("ci.`car_type`,timetable.`type`")
+        .select();
+        return this.success(query);
+    }
+
+
 
     // 文档下载demo
     async downLoadAction() {
-            // 查询数据信息
-            // let startTime = this.post("startTime");  // 开始时间
-            // let endTime = this.post("endTime");  // 结束时间
-            // let type =this.post("type"); // 科目类型
+        // 查询数据信息
+        // let startTime = this.post("startTime");  // 开始时间
+        // let endTime = this.post("endTime");  // 结束时间
+        // let type =this.post("type"); // 科目类型
 
-            // 查询当月数据信息
-        let test =    await this.model("orders").where({ "order_time": { ">=": '2020-10-01', "<=": '2020-10-31' }})
+        // 查询当月数据信息
+        let test = await this.model("orders").where({ "order_time": { ">=": '2020-10-01', "<=": '2020-10-31' } })
             .field("order_time,count(1) as amount")
             .group("order_time").order("order_time").select();
 
-         
-          var msg = [{
+
+        var msg = [{
             "ds_year": "2020年10月份",
-            "ds_month":"",
-            "ds_type":"科目2收入明细"
-          }];
-          
-         var data = [];
+            "ds_month": "",
+            "ds_type": "科目2收入明细"
+        }];
 
-         data.push(msg);
-         data.push(test);
+        var data = [];
 
-         var dd = JSON.parse(JSON.stringify(data));
+        data.push(msg);
+        data.push(test);
 
-          console.log(dd)
-                 var templatePath = path.resolve(process.cwd() + '/www/static/xlsx/test.xlsx');
-                 var name = "订单列表" + moment().format("YYYYMMDDHHmmss") + ".xlsx";
-                 var excel = await excelUtil.downloadExcels( name,dd, templatePath);
+        var dd = JSON.parse(JSON.stringify(data));
 
-         return this.success(excel);
+        console.log(dd)
+        var templatePath = path.resolve(process.cwd() + '/www/static/xlsx/test.xlsx');
+        var name = "订单列表" + moment().format("YYYYMMDDHHmmss") + ".xlsx";
+        var excel = await excelUtil.downloadExcels(name, dd, templatePath);
+
+        return this.success(excel);
 
     }
 
