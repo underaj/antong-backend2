@@ -346,7 +346,7 @@ module.exports = class extends Base {
       .find();
     let refundData = await this.model("refund").where({
       order_timetable_id: id,
-    }).find();
+    }).select();
     //返回查询结果
     data.students = stu;
     data.coach = coachData;
