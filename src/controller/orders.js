@@ -1404,7 +1404,7 @@ module.exports = class extends Base {
         //添加退款记录信息
         await this.model("refund").add({
           out_trade_no: payment.out_trade_no, //商户订单号
-          amount: payment.amount, //退款金额
+          amount: element.order_rebates, //退款金额
           response: "", //返回响应
           create_time: moment(new Date()).format("YYYY-MM-DD HH:mm:ss"), //创建时间
           status: "", //返回状态信息
