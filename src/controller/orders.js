@@ -344,9 +344,13 @@ module.exports = class extends Base {
       .join("coach b ON orders.coach_id=b.id")
       .where({ "orders.id": stu[0].orders_id })
       .find();
+    let refundData = await this.model("refund").where({
+      order_timetable_id: id,
+    });
     //返回查询结果
     data.students = stu;
     data.coach = coachData;
+    data.refund = refundData;
     return this.success(data);
   }
 
