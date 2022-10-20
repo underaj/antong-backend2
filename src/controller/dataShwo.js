@@ -101,7 +101,7 @@ module.exports = class extends Base {
             STATUS: 1,
             collection_type: 2,
           })
-          .field("IFNULL(SUM(order_rebates),0) AS order_rebate")
+          .field("IFNULL(SUM(order_rebates),0) AS order_rebates")
           .find();
         dayAmount.push({
           type: element.type,
@@ -123,7 +123,7 @@ module.exports = class extends Base {
             STATUS: 1,
             collection_type: 2,
           })
-          .field("IFNULL(SUM(order_rebates),0) AS order_rebates ")
+          .field("IFNULL(SUM(order_rebates),0) AS order_rebates")
           .find();
         dayAmount.push({
           type: element.type,
