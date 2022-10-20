@@ -78,13 +78,13 @@ module.exports = class extends Base {
     //  计算当天时间的收入信息
     let dataDay = await this.model("v_sum_orders_amount")
       .field(
-        "1 AS type,IFNULL(count(1),0) AS actule,IFNULL(SUM(CASE WHEN print = 0 THEN 1 ELSE 0 END),0) AS noprint,IFNULL(COUNT(1), 0) AS receivable, 100 AS payment"
+        "1 AS type,IFNULL(count(1),0) AS actule,IFNULL(SUM(CASE WHEN print = 0 THEN 1 ELSE 0 END),0) AS noprint, 100 AS payment"
       )
       .where({ order_time: selectDate, suject: 1 })
       .union(
-        "SELECT 2 AS type,IFNULL(count(1),0) AS actule,IFNULL(SUM(CASE WHEN print = 0 THEN 1 ELSE 0 END),0) AS noprint,IFNULL(COUNT(1), 0) AS receivable,200 AS payment FROM v_sum_orders_amount WHERE order_time = '" +
+        "SELECT 2 AS type,IFNULL(count(1),0) AS actule,IFNULL(SUM(CASE WHEN print = 0 THEN 1 ELSE 0 END),0) AS noprint,200 AS payment FROM v_sum_orders_amount WHERE order_time = '" +
           selectDate +
-          "' AND suject = 2 "
+          "' AND suject = 2"
       )
       .select();
     // 计算当天的实收 和应收
@@ -101,15 +101,16 @@ module.exports = class extends Base {
             STATUS: 1,
             collection_type: 2,
           })
-          .field("IFNULL(SUM(order_rebates),0) AS order_rebates ")
+          .field("IFNULL(SUM(order_rebates),0) AS order_rebate")
           .find();
         dayAmount.push({
           type: element.type,
+          printed: element.actule - element.noprint,
           actule:
             element.noprint * 80 +
-            (element.receivable - element.noprint) * (80 + element.payment), // 科目二实际收款  打单数量 + 加上 未打单数量
+            (element.actule - element.noprint) * (80 + element.payment), // 科目二实际收款  打单数量 + 加上 未打单数量
           receivable:
-            element.receivable * 80 + element.receivable * element.payment, // 科目二的应收款
+            element.actule * 80 + element.actule * element.payment, // 科目二的应收款
           order_rebates: suject1.order_rebates,
         });
       } else {
@@ -126,9 +127,10 @@ module.exports = class extends Base {
           .find();
         dayAmount.push({
           type: element.type,
+          printed: element.actule - element.noprint,
           actule:
             element.noprint * 80 +
-            (element.receivable - element.noprint) * (80 + element.payment), // 科目三实际收款
+            (element.actule - element.noprint) * (80 + element.payment), // 科目三实际收款
           receivable: element.actule * (80 + element.payment), // 科目三的应收款
           order_rebates: suject2.order_rebates,
         });
@@ -150,11 +152,11 @@ module.exports = class extends Base {
     // 计算当月的实收和 应收
     let dataMonth = await this.model("v_sum_orders_amount")
       .field(
-        "1 AS type,IFNULL(count(1),0) AS actule,IFNULL(SUM(CASE WHEN print = 0 THEN 1 ELSE 0 END),0) AS noprint,IFNULL(COUNT(1), 0) AS receivable, 100 AS payment"
+        "1 AS type,IFNULL(count(1),0) AS actule,IFNULL(SUM(CASE WHEN print = 0 THEN 1 ELSE 0 END),0) AS noprint, 100 AS payment"
       )
       .where({ order_time: { ">=": firstDay, "<=": endDay }, suject: 1 })
       .union(
-        "SELECT 2 AS type,IFNULL(count(1),0) AS actule,IFNULL(SUM(CASE WHEN print = 0 THEN 1 ELSE 0 END),0) AS noprint,IFNULL(COUNT(1), 0) AS receivable,200 AS payment FROM v_sum_orders_amount WHERE order_time >= '" +
+        "SELECT 2 AS type,IFNULL(count(1),0) AS actule,IFNULL(SUM(CASE WHEN print = 0 THEN 1 ELSE 0 END),0) AS noprint,200 AS payment FROM v_sum_orders_amount WHERE order_time >= '" +
           firstDay +
           "' and  order_time <= '" +
           endDay +
@@ -186,12 +188,13 @@ module.exports = class extends Base {
 
         monthAmount.push({
           type: element.type,
+          printed: element.actule - element.noprint,
           actule:
             element.actule * 80 +
             element.actule * element.payment +
             element.noprint * 80, // 科目二实际收款
           receivable:
-            element.receivable * 80 + element.receivable * element.payment, // 科目三的应收款
+            element.actule * 80 + element.actule * element.payment, // 科目三的应收款
           order_rebates: suject1.order_rebates,
           deposit: payAmount.deposit, // 只付定金没有支付尾款的数据总和
         });
@@ -218,12 +221,13 @@ module.exports = class extends Base {
 
         monthAmount.push({
           type: element.type,
+          printed: element.actule - element.noprint,
           actule:
             element.actule * 80 +
             element.actule * element.payment +
             element.noprint * 80, // 科目三实际收款
           receivable:
-            element.receivable * 80 + element.receivable * element.payment, // 科目三的应收款
+            element.actule * 80 + element.actule * element.payment, // 科目三的应收款
           order_rebates: suject2.order_rebates,
           deposit: payAmount.deposit, // 只付定金没有支付尾款的数据总和
         });
