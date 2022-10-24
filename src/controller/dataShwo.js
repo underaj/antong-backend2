@@ -20,7 +20,7 @@ module.exports = class extends Base {
    */
   async dataShowAction() {
     const userId = this.post("userId");
-    if (userId === 1 || userId === 52) {
+    if (userId === '1' || userId === '52') {
       //查询订单详情信息
       let data = await this.model(" orders a")
         .field(
@@ -80,7 +80,7 @@ module.exports = class extends Base {
   async getOrdersByDayAction() {
     // 获取时间
     const userId = this.post("userId");
-    if (userId === 1 || userId === 52) {
+    if (userId === '1' || userId === '52') {
       let selectDate = moment(this.post("selectDate")).format("YYYY-MM-DD");
       //  计算当天时间的收入信息
       let dataDay = await this.model("v_sum_orders_amount")
@@ -152,7 +152,7 @@ module.exports = class extends Base {
   async getOrdersByMonthAction() {
     // 获取时间
     const userId = this.post("userId");
-    if (userId === 1 || userId === 52) {
+    if (userId === '1' || userId === '52') {
       let selectDate = moment(this.post("selectDate")).format("YYYY-MM-DD");
       // 获取系统当前月份第一天
       let firstDay = moment(selectDate).startOf("month").format("YYYY-MM-DD");
